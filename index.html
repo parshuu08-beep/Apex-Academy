@@ -42,7 +42,7 @@
     </div>
   </div>
 
-  <!-- AUTHENTICATION FORM -->
+  <!-- AUTH SCREEN -->
   <div id="authScreen" class="w-full max-w-md my-auto p-6 ink-card bg-amber-50 border-4 border-slate-900 shadow-2xl">
     <div class="text-center space-y-1 mb-6">
       <div class="w-14 h-14 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center mx-auto border-2 border-slate-900 shadow">
@@ -60,7 +60,7 @@
     <!-- Login -->
     <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-xs block">
       <div>
-        <label class="block font-bold text-slate-800 mb-1">Director / Staff Email</label>
+        <label class="block font-bold text-slate-800 mb-1">Director / Teacher Email</label>
         <input type="email" id="loginEmail" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="admin@coaching.com">
       </div>
       <div>
@@ -79,7 +79,7 @@
         <input type="text" id="regInstituteName" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="e.g. Mastermind Classes">
       </div>
       <div>
-        <label class="block font-bold text-slate-800 mb-1">Official WhatsApp / Contact Phone (10-Digit)</label>
+        <label class="block font-bold text-slate-800 mb-1">Official WhatsApp Phone (10-Digit)</label>
         <input type="tel" id="regPhone" required pattern="^[6-9][0-9]{9}$" maxlength="10" class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="9876543210">
       </div>
       <div>
@@ -96,7 +96,7 @@
     </form>
   </div>
 
-  <!-- MAIN DASHBOARD SHELL -->
+  <!-- MAIN DASHBOARD -->
   <div id="mainApp" class="w-full max-w-6xl min-h-[92vh] bg-slate-50 border-4 border-slate-900 rounded-3xl flex-col hidden shadow-2xl my-2 overflow-hidden relative">
     
     <!-- Header -->
@@ -105,7 +105,7 @@
         <div class="flex items-center gap-3">
           <div id="headerLogoContainer" class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black overflow-hidden border-2 border-slate-800">
             <i id="defaultLogoIcon" class="fa-solid fa-graduation-cap text-lg"></i>
-            <img id="customInstituteLogo" class="w-full h-full object-cover hidden" alt="Institute Logo">
+            <img id="customInstituteLogo" class="w-full h-full object-cover hidden" alt="Logo">
           </div>
           <div>
             <h2 id="headerInstituteName" class="text-sm sm:text-base font-black text-amber-300">CochiHelp</h2>
@@ -119,25 +119,28 @@
             <span class="hidden sm:inline">Refresh</span>
           </button>
 
-          <!-- KEBAB MENU BUTTON (⋮) -->
+          <!-- KEBAB MENU BUTTON -->
           <button onclick="toggleKebabMenu(event)" id="kebabBtn" class="ink-btn bg-amber-400 text-slate-950 text-xs px-2.5 py-1.5 rounded-xl font-black">
             <i class="fa-solid fa-ellipsis-vertical"></i>
           </button>
 
-          <!-- KEBAB DROPDOWN MENU -->
-          <div id="kebabDropdown" class="hidden absolute right-0 top-10 w-56 bg-white border-2 border-slate-900 rounded-2xl shadow-2xl py-2 z-50 text-xs text-slate-800 font-semibold space-y-1">
+          <!-- KEBAB DROPDOWN -->
+          <div id="kebabDropdown" class="hidden absolute right-0 top-10 w-60 bg-white border-2 border-slate-900 rounded-2xl shadow-2xl py-2 z-50 text-xs text-slate-800 font-semibold space-y-1">
             <div class="px-3 py-1.5 border-b border-slate-100">
-              <p class="text-[10px] text-slate-400 uppercase font-bold">Institute Settings</p>
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Institute Portal</p>
               <p id="kebabRoleEmail" class="text-[11px] font-bold text-slate-900 truncate"></p>
             </div>
+            <button onclick="openInstituteAboutModal(); hideKebabMenu()" class="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> Institute Profile & About Us
+            </button>
             <button onclick="openInstituteSettingsModal(); hideKebabMenu()" class="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2">
-              <i class="fa-solid fa-sliders text-amber-600"></i> Institute Branding & Details
+              <i class="fa-solid fa-sliders text-amber-600"></i> Edit Branding & Address
             </button>
             <button onclick="openHolidaysModal(); hideKebabMenu()" class="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2">
               <i class="fa-solid fa-calendar-xmark text-indigo-600"></i> Academic Holidays
             </button>
             <button onclick="openExportModal(); hideKebabMenu()" class="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2">
-              <i class="fa-solid fa-file-excel text-emerald-600"></i> Export Data (CSV)
+              <i class="fa-solid fa-file-excel text-emerald-600"></i> Export Roster (CSV)
             </button>
             <div class="border-t border-slate-100 pt-1">
               <button onclick="handleSignOut()" class="w-full text-left px-3 py-2 text-rose-700 hover:bg-rose-50 flex items-center gap-2">
@@ -153,20 +156,19 @@
         <button onclick="setTab('dashboard')" id="nav-dashboard" class="px-3 py-1.5 font-bold rounded-xl bg-amber-400 text-slate-950">Dashboard</button>
         <button onclick="setTab('batches')" id="nav-batches" class="px-3 py-1.5 font-semibold text-slate-300">Batches</button>
         <button onclick="setTab('students')" id="nav-students" class="px-3 py-1.5 font-semibold text-slate-300">Students</button>
-        <button onclick="setTab('attendance')" id="nav-attendance" class="px-3 py-1.5 font-semibold text-slate-300">Attendance</button>
+        <button onclick="setTab('attendance')" id="nav-attendance" class="px-3 py-1.5 font-semibold text-slate-300">Daily Attendance</button>
         <button onclick="setTab('fees')" id="nav-fees" class="px-3 py-1.5 font-semibold text-slate-300">Fees</button>
-        <button onclick="setTab('tests')" id="nav-tests" class="px-3 py-1.5 font-semibold text-slate-300">Tests & Papers</button>
+        <button onclick="setTab('tests')" id="nav-tests" class="px-3 py-1.5 font-semibold text-slate-300">Tests</button>
         <button onclick="setTab('enquiries')" id="nav-enquiries" class="px-3 py-1.5 font-semibold text-slate-300">Enquiries</button>
       </nav>
     </header>
 
-    <!-- Main Dynamic Content Container -->
     <main id="appBody" class="flex-1 p-3 sm:p-5 overflow-y-auto space-y-4"></main>
   </div>
 
-  <!-- MODAL CONTAINER (FOR POPUPS) -->
+  <!-- POPUP MODAL -->
   <div id="modalOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
-    <div id="modalBox" class="bg-white w-full max-w-lg rounded-2xl p-5 border-4 border-slate-900 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"></div>
+    <div id="modalBox" class="bg-white w-full max-w-lg rounded-2xl p-5 border-4 border-slate-900 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto"></div>
   </div>
 
   <script>
@@ -192,6 +194,17 @@
       discounts: [],
       enquiries: []
     };
+
+    function getTodayIndianDate() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    let currentAttendanceDate = getTodayIndianDate();
+    let currentAttendanceBatch = null;
 
     window.addEventListener('DOMContentLoaded', async () => {
       window.addEventListener('click', (e) => {
@@ -299,7 +312,7 @@
       if (error) {
         showToast(error.message, true);
       } else {
-        showToast("Institute create ho gaya! Kripya Sign In karein.");
+        showToast("Institute ban gaya! Sign in kijiye.");
         switchAuthTab('login');
       }
     }
@@ -313,7 +326,7 @@
         .single();
 
       if (error || !member) {
-        showToast("Institute mapping nahi mili.", true);
+        showToast("Institute record nahi mila.", true);
         return;
       }
 
@@ -332,9 +345,9 @@
 
     function updateInstituteHeaderUI() {
       if (!currentInstitute) return;
-      document.getElementById('headerInstituteName').textContent = currentInstitute.name || 'CochiHelp Institute';
-      const loc = [currentInstitute.address, currentInstitute.city, currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : ''].filter(Boolean).join(' • ');
-      document.getElementById('headerInstituteLocation').textContent = loc || 'Configure in settings (⋮)';
+      document.getElementById('headerInstituteName').textContent = currentInstitute.name || 'CochiHelp';
+      const loc = [currentInstitute.city, currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : ''].filter(Boolean).join(' • ');
+      document.getElementById('headerInstituteLocation').textContent = loc || 'Location not configured (⋮)';
 
       const logoImg = document.getElementById('customInstituteLogo');
       const logoIcon = document.getElementById('defaultLogoIcon');
@@ -398,9 +411,9 @@
         }
 
         renderActiveTab();
-        if (manual) showToast("Latest data successfully loaded!");
+        if (manual) showToast("Data refreshed!");
       } catch (err) {
-        showToast("Sync error: " + err.message, true);
+        showToast("Error: " + err.message, true);
       } finally {
         if (icon) icon.classList.remove('fa-spin');
       }
@@ -433,50 +446,97 @@
     }
 
     // ==========================================
-    // KEBAB MENU WORKABLE SETTINGS
+    // ABOUT US & SETTINGS (JPG FILE UPLOAD)
     // ==========================================
+    function openInstituteAboutModal() {
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <h3 class="text-sm font-black text-slate-900">About ${currentInstitute.name || 'Our Institute'}</h3>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border">
+            <div class="w-14 h-14 rounded-xl bg-amber-400 flex items-center justify-center overflow-hidden border">
+              ${currentInstitute.logo_url ? `<img src="${currentInstitute.logo_url}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-graduation-cap text-2xl text-slate-950"></i>`}
+            </div>
+            <div>
+              <h4 class="text-sm font-black text-slate-900">${currentInstitute.name || 'Coaching Institute'}</h4>
+              <p class="text-[11px] text-amber-800 font-bold">${currentInstitute.tagline || 'Excellence in Education'}</p>
+              <p class="text-[10px] text-slate-500">Contact: +91 ${currentInstitute.contact_phone || 'N/A'}</p>
+            </div>
+          </div>
+          <div class="p-3 bg-white rounded-xl border space-y-1">
+            <p class="font-bold text-slate-800"><i class="fa-solid fa-location-dot text-rose-600 mr-1"></i> Institute Address:</p>
+            <p class="text-slate-600">${currentInstitute.address || 'Address not updated.'}</p>
+            <p class="text-slate-600 font-semibold">${currentInstitute.city || ''}</p>
+          </div>
+          <div class="pt-2 flex justify-end">
+            <button onclick="openInstituteSettingsModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs">
+              <i class="fa-solid fa-pen mr-1"></i> Edit Details
+            </button>
+          </div>
+        </div>
+      `;
+      openModal(content);
+    }
+
     function openInstituteSettingsModal() {
       const content = `
         <div class="flex items-center justify-between pb-2 border-b">
-          <h3 class="text-sm font-black text-slate-900">Institute Branding & Contact Information</h3>
+          <h3 class="text-sm font-black text-slate-900">Institute Branding & Direct JPG Logo</h3>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form onsubmit="handleSaveInstituteSettings(event)" class="space-y-3 text-xs">
           <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Coaching Institute Name *</label>
-            <input type="text" id="ins_name" required value="${currentInstitute.name || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="e.g. Mastermind Academy">
+            <label class="block font-bold text-slate-800 mb-0.5">Institute Name *</label>
+            <input type="text" id="ins_name" required value="${currentInstitute.name || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block font-bold text-slate-800 mb-0.5">Institute Contact / WhatsApp Phone *</label>
-              <input type="tel" id="ins_phone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${currentInstitute.contact_phone || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="9876543210">
+              <label class="block font-bold text-slate-800 mb-0.5">WhatsApp / Contact Phone *</label>
+              <input type="tel" id="ins_phone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${currentInstitute.contact_phone || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
             <div>
-              <label class="block font-bold text-slate-800 mb-0.5">Tagline / Specialization</label>
-              <input type="text" id="ins_tagline" value="${currentInstitute.tagline || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Excellence in IIT-JEE & Boards">
+              <label class="block font-bold text-slate-800 mb-0.5">Tagline</label>
+              <input type="text" id="ins_tagline" value="${currentInstitute.tagline || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Board & JEE Prep">
             </div>
           </div>
+
           <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Logo Image URL</label>
-            <input type="url" id="ins_logo" value="${currentInstitute.logo_url || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="https://example.com/logo.png">
+            <label class="block font-bold text-slate-800 mb-0.5">Upload Logo (JPG / PNG from Phone / PC)</label>
+            <input type="file" id="ins_logo_file" accept="image/jpeg,image/png,image/jpg" onchange="convertLogoToBase64(event)" class="w-full p-2 border-2 border-slate-900 rounded-xl bg-slate-50 text-[11px]">
+            <input type="hidden" id="ins_logo_base64" value="${currentInstitute.logo_url || ''}">
+            <p class="text-[10px] text-slate-500 mt-0.5">Gallery se photo choose karein, URL ki zaroorat nahi hai.</p>
           </div>
+
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Street Address</label>
-              <input type="text" id="ins_address" value="${currentInstitute.address || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Plot 44, Station Road">
+              <input type="text" id="ins_address" value="${currentInstitute.address || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
             <div>
-              <label class="block font-bold text-slate-800 mb-0.5">City / State</label>
-              <input type="text" id="ins_city" value="${currentInstitute.city || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Mumbai, Maharashtra">
+              <label class="block font-bold text-slate-800 mb-0.5">City / Area</label>
+              <input type="text" id="ins_city" value="${currentInstitute.city || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
           </div>
           <div class="pt-2 flex gap-2">
             <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2 bg-slate-200 font-bold rounded-xl">Cancel</button>
-            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Information</button>
+            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Info</button>
           </div>
         </form>
       `;
       openModal(content);
+    }
+
+    function convertLogoToBase64(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('ins_logo_base64').value = evt.target.result;
+        showToast("Logo JPG select ho gaya!");
+      };
+      reader.readAsDataURL(file);
     }
 
     async function handleSaveInstituteSettings(e) {
@@ -484,7 +544,7 @@
       const name = document.getElementById('ins_name').value.trim();
       const contact_phone = document.getElementById('ins_phone').value.trim();
       const tagline = document.getElementById('ins_tagline').value.trim();
-      const logo_url = document.getElementById('ins_logo').value.trim();
+      const logo_url = document.getElementById('ins_logo_base64').value;
       const address = document.getElementById('ins_address').value.trim();
       const city = document.getElementById('ins_city').value.trim();
 
@@ -496,11 +556,11 @@
         .single();
 
       if (error) {
-        showToast("Error saving profile: " + error.message, true);
+        showToast(error.message, true);
       } else {
         currentInstitute = data;
         updateInstituteHeaderUI();
-        showToast("Institute information updated!");
+        showToast("Institute information saved!");
         closeModal();
       }
     }
@@ -508,12 +568,12 @@
     function openHolidaysModal() {
       const content = `
         <div class="flex items-center justify-between pb-2 border-b">
-          <h3 class="text-sm font-black text-slate-900">Academic Holidays List</h3>
+          <h3 class="text-sm font-black text-slate-900">Academic Holidays</h3>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form onsubmit="handleSaveHoliday(event)" class="flex gap-2">
-          <input type="date" id="hol_date" required class="p-2 border-2 border-slate-900 rounded-xl text-xs">
-          <input type="text" id="hol_title" required placeholder="Holiday reason (e.g. Diwali)" class="p-2 border-2 border-slate-900 rounded-xl text-xs flex-1">
+          <input type="date" id="hol_date" required value="${getTodayIndianDate()}" class="p-2 border-2 border-slate-900 rounded-xl text-xs">
+          <input type="text" id="hol_title" required placeholder="Reason (e.g. Sunday / Festival)" class="p-2 border-2 border-slate-900 rounded-xl text-xs flex-1">
           <button type="submit" class="ink-btn bg-slate-900 text-white px-3 py-1 text-xs font-bold rounded-xl">+ Add</button>
         </form>
         <div class="divide-y divide-slate-100 max-h-48 overflow-y-auto text-xs">
@@ -525,7 +585,7 @@
               </div>
               <button onclick="deleteHoliday('${h.id}')" class="text-rose-600 hover:text-rose-800 text-xs"><i class="fa-solid fa-trash"></i></button>
             </div>
-          `).join('') || '<p class="text-xs text-slate-400 py-3 text-center">Koi holiday set nahi hai.</p>'}
+          `).join('') || '<p class="text-xs text-slate-400 py-3 text-center">Koi holiday nahi hai.</p>'}
         </div>
       `;
       openModal(content);
@@ -551,7 +611,7 @@
     }
 
     function openExportModal() {
-      let csv = "Student Name,Standard,Student Phone,Parent Name,Parent Phone,Total Fee,Pending Fee\n";
+      let csv = "Student Name,Standard,Student WhatsApp,Parent Name,Parent WhatsApp,Total Fee,Pending Balance\n";
       state.students.forEach(s => {
         const bal = computeStudentPendingBalance(s.id);
         csv += `"${s.student_name}","${s.standard}","${s.student_phone}","${s.parent_name}","${s.parent_phone}",${s.total_agreed_fee},${bal}\n`;
@@ -560,9 +620,9 @@
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.setAttribute('href', url);
-      a.setAttribute('download', `${currentInstitute.name || 'CochiHelp'}_Students.csv`);
+      a.setAttribute('download', `${currentInstitute.name || 'CochiHelp'}_Roster.csv`);
       a.click();
-      showToast("Student roster CSV export downloaded!");
+      showToast("CSV Downloaded!");
     }
 
     // ==========================================
@@ -570,81 +630,50 @@
     // ==========================================
     function renderDashboardView(container) {
       const activeStudents = state.students.filter(s => s.status === 'active');
-      const totalStudents = activeStudents.length;
-
       let totalAgreed = 0;
       let totalDiscounts = state.discounts.reduce((acc, d) => acc + Number(d.discount_amount), 0);
       let totalPaid = state.payments.filter(p => p.status === 'active').reduce((acc, p) => acc + Number(p.amount), 0);
-
-      activeStudents.forEach(s => {
-        totalAgreed += Number(s.total_agreed_fee);
-      });
-      const netTuition = Math.max(0, totalAgreed - totalDiscounts);
-      const totalPending = Math.max(0, netTuition - totalPaid);
-      const newEnquiries = state.enquiries.filter(e => e.status === 'New' || e.status === 'Follow-up').length;
+      activeStudents.forEach(s => totalAgreed += Number(s.total_agreed_fee));
+      const totalPending = Math.max(0, (totalAgreed - totalDiscounts) - totalPaid);
 
       container.innerHTML = `
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="ink-card p-3.5 bg-white border-slate-800">
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Active Enrolled</span>
-            <p class="text-xl font-black text-slate-900 mt-1">${totalStudents}</p>
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Total Students</span>
+            <p class="text-xl font-black text-slate-900 mt-1">${activeStudents.length}</p>
           </div>
           <div class="ink-card p-3.5 bg-rose-50 border-rose-800">
-            <span class="text-[10px] font-bold text-rose-700 uppercase tracking-wider block">Total Pending Fees</span>
+            <span class="text-[10px] font-bold text-rose-700 uppercase tracking-wider block">Pending Fees</span>
             <p class="text-xl font-black text-rose-700 mt-1">₹${totalPending.toLocaleString('en-IN')}</p>
           </div>
           <div class="ink-card p-3.5 bg-emerald-50 border-emerald-800">
-            <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Fees Collected</span>
+            <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Fee Collected</span>
             <p class="text-xl font-black text-emerald-800 mt-1">₹${totalPaid.toLocaleString('en-IN')}</p>
           </div>
           <div class="ink-card p-3.5 bg-amber-50 border-amber-800">
-            <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">Pending Enquiries</span>
-            <p class="text-xl font-black text-amber-800 mt-1">${newEnquiries}</p>
+            <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">Total Batches</span>
+            <p class="text-xl font-black text-amber-800 mt-1">${state.batches.length}</p>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-          <div class="ink-card p-4 bg-white space-y-3">
-            <div class="flex items-center justify-between pb-2 border-b">
-              <h3 class="text-xs font-black uppercase text-slate-800">Quick Batch Roster</h3>
-              <button onclick="setTab('batches')" class="text-xs text-amber-700 font-bold hover:underline">Manage Batches</button>
-            </div>
-            <div class="space-y-2">
-              ${state.batches.map(b => {
-                const bStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === b.id));
-                return `
-                  <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between text-xs">
-                    <div>
-                      <p class="font-bold text-slate-900">${b.name} <span class="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded ml-1">${b.standard}</span></p>
-                      <p class="text-[10px] text-slate-500">${b.timing} &bull; ${b.days.join(', ')}</p>
-                    </div>
-                    <span class="font-black text-slate-800 bg-amber-200 px-2 py-0.5 rounded-full text-[11px]">${bStudents.length} Students</span>
-                  </div>
-                `;
-              }).join('') || '<p class="text-xs text-slate-400 py-3 text-center">Koi batches nahi hain.</p>'}
-            </div>
+        <div class="ink-card p-4 bg-white mt-3 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b">
+            <h3 class="text-xs font-black uppercase text-slate-800">Direct Actions</h3>
+            <span class="text-[11px] font-bold text-slate-500">Date: ${currentAttendanceDate}</span>
           </div>
-
-          <div class="ink-card p-4 bg-white space-y-3">
-            <div class="flex items-center justify-between pb-2 border-b">
-              <h3 class="text-xs font-black uppercase text-slate-800">Overdue Fee Dues</h3>
-              <button onclick="setTab('fees')" class="text-xs text-rose-700 font-bold hover:underline">Fee Ledger</button>
-            </div>
-            <div class="space-y-2">
-              ${state.students.slice(0, 5).map(s => {
-                const bal = computeStudentPendingBalance(s.id);
-                if (bal <= 0) return '';
-                return `
-                  <div class="p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 flex items-center justify-between text-xs">
-                    <div>
-                      <p class="font-bold text-slate-900">${s.student_name} (${s.standard})</p>
-                      <p class="text-[10px] text-slate-500">Parent: ${s.parent_name} (+91 ${s.parent_phone}) &bull; Due Day: ${s.fee_due_day}th</p>
-                    </div>
-                    <span class="font-black text-rose-700">₹${bal.toLocaleString('en-IN')} Due</span>
-                  </div>
-                `;
-              }).join('') || '<p class="text-xs text-slate-400 py-3 text-center">Koi overdue records nahi hain.</p>'}
-            </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button onclick="setTab('attendance')" class="ink-btn p-3 bg-amber-50 rounded-xl text-left border border-amber-300">
+              <p class="font-bold text-xs text-amber-950"><i class="fa-solid fa-clipboard-user mr-1 text-amber-600"></i> Mark Attendance</p>
+              <p class="text-[10px] text-amber-800">Daily lock & automatic WhatsApp</p>
+            </button>
+            <button onclick="setTab('students')" class="ink-btn p-3 bg-blue-50 rounded-xl text-left border border-blue-300">
+              <p class="font-bold text-xs text-blue-950"><i class="fa-solid fa-camera mr-1 text-blue-600"></i> Check Student Paper</p>
+              <p class="text-[10px] text-blue-800">Student profile se photo & marks</p>
+            </button>
+            <button onclick="setTab('fees')" class="ink-btn p-3 bg-emerald-50 rounded-xl text-left border border-emerald-300">
+              <p class="font-bold text-xs text-emerald-950"><i class="fa-solid fa-indian-rupee-sign mr-1 text-emerald-600"></i> Fees Ledger</p>
+              <p class="text-[10px] text-emerald-800">Installments & receipt PDF</p>
+            </button>
           </div>
         </div>
       `;
@@ -658,7 +687,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-base font-black text-slate-900">Institute Batches</h3>
-            <p class="text-xs text-slate-500">Standard and Timing ke hisaab se batches organize karein</p>
+            <p class="text-xs text-slate-500">Standard and Timings</p>
           </div>
           <button onclick="openBatchModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
             <i class="fa-solid fa-plus mr-1"></i> Add Batch
@@ -675,51 +704,42 @@
                     <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full uppercase">${b.standard}</span>
                     <h4 class="text-sm font-black text-slate-900 mt-1">${b.name}</h4>
                   </div>
-                  <div class="flex items-center gap-1">
-                    <button onclick="openBatchModal('${b.id}')" class="text-slate-600 hover:text-slate-900 p-1"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
-                    <button onclick="deleteBatch('${b.id}')" class="text-rose-600 hover:text-rose-900 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                  </div>
+                  <button onclick="deleteBatch('${b.id}')" class="text-rose-600 hover:text-rose-900 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                 </div>
                 <p class="text-xs text-slate-600"><i class="fa-regular fa-clock mr-1"></i> ${b.timing}</p>
-                <div class="flex flex-wrap gap-1">
-                  ${b.days.map(d => `<span class="text-[9px] bg-slate-100 border px-1 rounded font-semibold text-slate-700">${d}</span>`).join('')}
-                </div>
                 <div class="pt-2 border-t flex items-center justify-between text-xs text-slate-500">
                   <span>Enrolled: <b>${count}</b> Students</span>
                 </div>
               </div>
             `;
           }).join('')}
-          ${state.batches.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi batch nahi banayi gayi hai. + Add Batch par click karein.</p>' : ''}
+          ${state.batches.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi batch nahi hai. + Add Batch dabayein.</p>' : ''}
         </div>
       `;
     }
 
-    function openBatchModal(batchId = null) {
-      const b = state.batches.find(x => x.id === batchId) || { name: '', standard: 'Class 10th', timing: '04:00 PM - 05:30 PM', days: ['Mon','Tue','Wed','Thu','Fri','Sat'] };
+    function openBatchModal() {
       const allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
       const content = `
         <div class="flex items-center justify-between pb-2 border-b">
-          <h3 class="text-sm font-black text-slate-900">${batchId ? 'Edit Batch' : 'Create New Batch'}</h3>
+          <h3 class="text-sm font-black text-slate-900">Create New Batch</h3>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <form onsubmit="handleSaveBatch(event, '${batchId || ''}')" class="space-y-3 text-xs">
+        <form onsubmit="handleSaveBatch(event)" class="space-y-3 text-xs">
           <div>
             <label class="block font-bold text-slate-800 mb-0.5">Batch Name *</label>
-            <input type="text" id="bm_name" required value="${b.name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Class 10th Evening Batch">
+            <input type="text" id="bm_name" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Class 10th Evening">
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
               <select id="bm_standard" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
-                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce']
-                  .map(st => `<option value="${st}" ${b.standard === st ? 'selected' : ''}>${st}</option>`).join('')}
+                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce'].map(st => `<option value="${st}">${st}</option>`).join('')}
               </select>
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Timing *</label>
-              <input type="text" id="bm_timing" required value="${b.timing}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="04:00 PM - 05:30 PM">
+              <input type="text" id="bm_timing" required value="04:00 PM - 05:30 PM" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
           </div>
           <div>
@@ -727,7 +747,7 @@
             <div class="grid grid-cols-4 gap-1.5" id="bm_days">
               ${allDays.map(day => `
                 <label class="flex items-center gap-1.5 p-1.5 border rounded-lg bg-slate-50 cursor-pointer">
-                  <input type="checkbox" value="${day}" ${b.days.includes(day) ? 'checked' : ''} class="accent-slate-900">
+                  <input type="checkbox" value="${day}" checked class="accent-slate-900">
                   <span class="text-[11px] font-semibold">${day}</span>
                 </label>
               `).join('')}
@@ -742,57 +762,44 @@
       openModal(content);
     }
 
-    async function handleSaveBatch(e, batchId) {
+    async function handleSaveBatch(e) {
       e.preventDefault();
       const name = document.getElementById('bm_name').value.trim();
       const standard = document.getElementById('bm_standard').value;
       const timing = document.getElementById('bm_timing').value.trim();
-      const dayCheckboxes = document.querySelectorAll('#bm_days input[type="checkbox"]:checked');
-      const days = Array.from(dayCheckboxes).map(c => c.value);
+      const days = Array.from(document.querySelectorAll('#bm_days input:checked')).map(c => c.value);
 
-      if (days.length === 0) {
-        showToast("Kam se kam ek din select karein!", true);
-        return;
-      }
-
-      const payload = { institute_id: currentInstitute.id, name, standard, timing, days };
-      let res;
-      if (batchId) {
-        res = await client.from('batches').update(payload).eq('id', batchId);
-      } else {
-        res = await client.from('batches').insert([payload]);
-      }
-
-      if (res.error) showToast(res.error.message, true);
+      const { error } = await client.from('batches').insert([{ institute_id: currentInstitute.id, name, standard, timing, days }]);
+      if (error) showToast(error.message, true);
       else {
-        showToast("Batch save ho gayi!");
+        showToast("Batch create ho gayi!");
         closeModal();
         await refreshData();
       }
     }
 
     async function deleteBatch(batchId) {
-      if (!confirm("Kya aap is batch ko delete karna chahte hain?")) return;
+      if (!confirm("Is batch ko delete karna chahte hain?")) return;
       const { error } = await client.from('batches').delete().eq('id', batchId);
       if (error) showToast(error.message, true);
       else {
-        showToast("Batch delete ho gayi.");
+        showToast("Batch deleted.");
         await refreshData();
       }
     }
 
     // ==========================================
-    // 3. STUDENTS VIEW
+    // 3. STUDENTS & PAPER EVALUATION
     // ==========================================
     function renderStudentsView(container) {
       container.innerHTML = `
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
             <h3 class="text-base font-black text-slate-900">Student Directory</h3>
-            <p class="text-xs text-slate-500">Total Enrolled: ${state.students.length} Students</p>
+            <p class="text-xs text-slate-500">Total: ${state.students.length} Students</p>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <input type="text" id="stdSearch" oninput="filterStudentRoster()" placeholder="Search by name/phone..." class="p-2 text-xs border-2 border-slate-900 rounded-xl bg-white w-full sm:w-48">
+            <input type="text" id="stdSearch" oninput="filterStudentRoster()" placeholder="Search name/phone..." class="p-2 text-xs border-2 border-slate-900 rounded-xl bg-white w-full sm:w-48">
             <button onclick="openAdmissionModal()" class="ink-btn bg-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl whitespace-nowrap">
               + Admission Form
             </button>
@@ -808,11 +815,6 @@
     function renderStudentCards(list) {
       if (list.length === 0) return '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi student nahi mila.</p>';
       return list.map(s => {
-        const studentBatches = (s.student_batches || []).map(sb => {
-          const b = state.batches.find(x => x.id === sb.batch_id);
-          return b ? b.name : '';
-        }).filter(Boolean);
-
         const bal = computeStudentPendingBalance(s.id);
         return `
           <div class="ink-card p-3.5 bg-white space-y-2.5 border-slate-800">
@@ -829,20 +831,15 @@
 
             <div class="p-2 rounded-xl bg-slate-50 text-[11px] space-y-1">
               <p class="text-slate-600"><b>Parent:</b> ${s.parent_name} (+91 ${s.parent_phone})</p>
-              <p class="text-slate-600 truncate"><b>School:</b> ${s.school || 'N/A'}</p>
-              <div class="flex flex-wrap gap-1 mt-1">
-                ${studentBatches.map(bn => `<span class="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-bold">${bn}</span>`).join('') || '<span class="text-[9px] text-rose-500">No batch assigned</span>'}
-              </div>
             </div>
 
-            <div class="pt-2 border-t flex items-center justify-between text-xs">
-              <button onclick="openStudentProfileModal('${s.id}')" class="text-amber-800 font-bold hover:underline">
-                <i class="fa-solid fa-id-card mr-1"></i> Full Profile & Report
+            <div class="pt-2 border-t flex items-center justify-between text-xs gap-1">
+              <button onclick="openStudentPaperEvaluationModal('${s.id}')" class="ink-btn bg-slate-900 text-amber-300 font-bold px-2 py-1.5 rounded-lg text-[11px] flex items-center gap-1">
+                <i class="fa-solid fa-camera"></i> Test Paper
               </button>
-              <div class="flex items-center gap-1.5">
-                <button onclick="openAdmissionModal('${s.id}')" class="text-slate-600 hover:text-slate-900 p-1" title="Edit Student"><i class="fa-solid fa-pen text-xs"></i></button>
-                <button onclick="deleteStudent('${s.id}')" class="text-rose-600 hover:text-rose-900 p-1" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>
-              </div>
+              <button onclick="openStudentProfileModal('${s.id}')" class="text-amber-800 font-bold hover:underline text-[11px]">
+                Report & Boxes &rarr;
+              </button>
             </div>
           </div>
         `;
@@ -859,90 +856,75 @@
       document.getElementById('studentsGrid').innerHTML = renderStudentCards(filtered);
     }
 
-    function openAdmissionModal(studentId = null, prefillData = null) {
+    function openAdmissionModal(studentId = null) {
       let s = state.students.find(x => x.id === studentId) || {
         student_name: '', standard: 'Class 10th', student_phone: '', parent_name: '', parent_phone: '',
-        school: '', address: '', admission_date: new Date().toISOString().split('T')[0],
+        school: '', address: '', admission_date: getTodayIndianDate(),
         total_agreed_fee: 30000, fee_due_day: 5, student_batches: []
       };
-
-      if (prefillData) {
-        s = { ...s, ...prefillData };
-      }
 
       const assignedBatchIds = (s.student_batches || []).map(sb => sb.batch_id);
 
       const content = `
         <div class="flex items-center justify-between pb-2 border-b">
-          <h3 class="text-sm font-black text-slate-900">${studentId ? 'Update Student Information' : 'New Student Admission Form'}</h3>
+          <h3 class="text-sm font-black text-slate-900">Admission Form</h3>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form onsubmit="handleSaveAdmission(event, '${studentId || ''}')" class="space-y-3 text-xs">
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Student Full Name *</label>
-              <input type="text" id="adm_name" required value="${s.student_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Student Name">
+              <input type="text" id="adm_name" required value="${s.student_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
               <select id="adm_standard" onchange="updateDynamicBatchDropdown()" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
-                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce']
-                  .map(st => `<option value="${st}" ${s.standard === st ? 'selected' : ''}>${st}</option>`).join('')}
+                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce'].map(st => `<option value="${st}" ${s.standard === st ? 'selected' : ''}>${st}</option>`).join('')}
               </select>
             </div>
           </div>
 
           <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Assign Batches (Filtered by Standard) *</label>
-            <div id="dynamicBatchBox" class="p-2 border-2 border-slate-900 rounded-xl bg-slate-50 space-y-1 max-h-28 overflow-y-auto">
-            </div>
+            <label class="block font-bold text-slate-800 mb-0.5">Select Batches *</label>
+            <div id="dynamicBatchBox" class="p-2 border-2 border-slate-900 rounded-xl bg-slate-50 space-y-1 max-h-24 overflow-y-auto"></div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Student WhatsApp (10-Digit) *</label>
-              <input type="tel" id="adm_sphone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${s.student_phone}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="9876543210">
+              <input type="tel" id="adm_sphone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${s.student_phone}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Parent Name *</label>
-              <input type="text" id="adm_pname" required value="${s.parent_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Parent Name">
+              <input type="text" id="adm_pname" required value="${s.parent_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Parent WhatsApp (10-Digit) *</label>
-              <input type="tel" id="adm_pphone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${s.parent_phone}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="9876543210">
+              <input type="tel" id="adm_pphone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${s.parent_phone}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
             <div>
-              <label class="block font-bold text-slate-800 mb-0.5">School / College</label>
-              <input type="text" id="adm_school" value="${s.school || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="School Name">
+              <label class="block font-bold text-slate-800 mb-0.5">School</label>
+              <input type="text" id="adm_school" value="${s.school || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Total Agreed Fee (₹) *</label>
               <input type="number" id="adm_totalfee" required min="0" value="${s.total_agreed_fee}" class="w-full p-2 border-2 border-slate-900 rounded-xl font-bold">
             </div>
             <div>
-              <label class="block font-bold text-slate-800 mb-0.5">Fee Due Date (Day) *</label>
+              <label class="block font-bold text-slate-800 mb-0.5">Due Date (Day 1-31) *</label>
               <input type="number" id="adm_dueday" required min="1" max="31" value="${s.fee_due_day}" class="w-full p-2 border-2 border-slate-900 rounded-xl font-bold">
             </div>
-            <div>
-              <label class="block font-bold text-slate-800 mb-0.5">Admission Date</label>
-              <input type="date" id="adm_date" required value="${s.admission_date}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
-            </div>
-          </div>
-
-          <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Residential Address</label>
-            <input type="text" id="adm_address" value="${s.address || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Address">
           </div>
 
           <div class="pt-2 flex gap-2">
             <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2.5 bg-slate-200 font-bold rounded-xl">Cancel</button>
-            <button type="submit" class="w-1/2 ink-btn py-2.5 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Admission</button>
+            <button type="submit" class="w-1/2 ink-btn py-2.5 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Student</button>
           </div>
         </form>
       `;
@@ -956,7 +938,7 @@
       const matchingBatches = state.batches.filter(b => b.standard === selectedStd);
 
       if (matchingBatches.length === 0) {
-        box.innerHTML = `<p class="text-[10px] text-rose-600 font-semibold py-1">Is standard ki koi batch nahi mili. Kripya pehle Batches tab me banayein.</p>`;
+        box.innerHTML = `<p class="text-[10px] text-rose-600 font-semibold py-1">Is standard ki batch nahi mili. Pehle batch banayein.</p>`;
         return;
       }
 
@@ -978,59 +960,156 @@
       const school = document.getElementById('adm_school').value.trim();
       const total_agreed_fee = Number(document.getElementById('adm_totalfee').value);
       const fee_due_day = Number(document.getElementById('adm_dueday').value);
-      const admission_date = document.getElementById('adm_date').value;
-      const address = document.getElementById('adm_address').value.trim();
-
       const batchCheckboxes = document.querySelectorAll('input[name="adm_batches"]:checked');
       const selectedBatchIds = Array.from(batchCheckboxes).map(c => c.value);
 
       if (selectedBatchIds.length === 0) {
-        showToast("Kam se kam ek batch select karein!", true);
+        showToast("Batch select karein!", true);
         return;
       }
 
       const payload = {
-        institute_id: currentInstitute.id,
-        student_name, standard, student_phone, parent_name, parent_phone,
-        school, total_agreed_fee, fee_due_day, admission_date, address
+        institute_id: currentInstitute.id, student_name, standard, student_phone,
+        parent_name, parent_phone, school, total_agreed_fee, fee_due_day
       };
 
       let currentStudentId = studentId;
-
       if (studentId) {
-        const { error } = await client.from('students').update(payload).eq('id', studentId);
-        if (error) { showToast(error.message, true); return; }
+        await client.from('students').update(payload).eq('id', studentId);
       } else {
-        const { data, error } = await client.from('students').insert([payload]).select().single();
-        if (error) { showToast(error.message, true); return; }
+        const { data } = await client.from('students').insert([payload]).select().single();
         currentStudentId = data.id;
       }
 
       await client.from('student_batches').delete().eq('student_id', currentStudentId);
-      const batchInserts = selectedBatchIds.map(bid => ({ student_id: currentStudentId, batch_id: bid }));
-      await client.from('student_batches').insert(batchInserts);
+      await client.from('student_batches').insert(selectedBatchIds.map(bid => ({ student_id: currentStudentId, batch_id: bid })));
 
-      showToast("Admission successfully saved!");
+      showToast("Student saved!");
       closeModal();
       await refreshData();
     }
 
-    async function deleteStudent(studentId) {
-      if (!confirm("Kya aap sach me is student ko delete karna chahte hain?")) return;
-      const { error } = await client.from('students').delete().eq('id', studentId);
-      if (error) showToast(error.message, true);
-      else {
-        showToast("Student deleted.");
-        await refreshData();
-      }
+    // ================================================================
+    // CAMERA / DIRECT PAPER CHECKING
+    // ================================================================
+    function openStudentPaperEvaluationModal(studentId) {
+      const s = state.students.find(x => x.id === studentId);
+      if (!s) return;
+
+      const studentBatchIds = (s.student_batches || []).map(sb => sb.batch_id);
+      const availableTests = state.tests.filter(t => studentBatchIds.includes(t.batch_id));
+
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">${s.student_name} (${s.standard})</h3>
+            <p class="text-[10px] text-slate-500">Test Paper Checking & Camera Photo</p>
+          </div>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <form onsubmit="handleSavePaperAndSendWhatsApp(event, '${studentId}')" class="space-y-3.5 text-xs">
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Kaunsa Test Conduct Hua Hai? *</label>
+            <select id="pe_test_id" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white font-semibold">
+              ${availableTests.map(t => `<option value="${t.id}">${t.test_name} - ${t.subject} (Max: ${t.total_marks} Marks)</option>`).join('')}
+              ${availableTests.length === 0 ? '<option disabled selected>Is batch ke liye koi test nahi bana hai</option>' : ''}
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Marks Obtained *</label>
+            <input type="number" id="pe_marks" required min="0" step="0.5" class="w-full p-2.5 border-2 border-slate-900 rounded-xl font-bold text-base" placeholder="Marks likhein">
+          </div>
+
+          <div class="p-3 bg-slate-50 border-2 border-dashed border-slate-400 rounded-xl text-center space-y-2">
+            <label class="cursor-pointer inline-flex items-center gap-2 bg-slate-900 text-amber-300 font-bold px-4 py-2 rounded-xl">
+              <i class="fa-solid fa-camera"></i> Click Photo from Camera
+              <input type="file" id="pe_camera_file" accept="image/*" capture="environment" onchange="previewCapturedPaper(event)" class="hidden">
+            </label>
+            <p class="text-[10px] text-slate-500">Ya device gallery se JPG image select karein.</p>
+            <div id="paperPreviewContainer" class="hidden mt-2">
+              <img id="paperPreviewImg" class="h-32 mx-auto rounded-lg border-2 border-slate-800 object-contain">
+              <p class="text-[9px] text-emerald-700 font-bold mt-1">Photo captured successfully!</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Teacher Remark / Note (Optional)</label>
+            <input type="text" id="pe_remark" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Step-marking achhi hai, calculation par dhyan dein">
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" ${availableTests.length === 0 ? 'disabled' : ''} class="w-full ink-btn py-3 bg-emerald-700 text-white font-black rounded-xl flex items-center justify-center gap-2">
+              <i class="fa-brands fa-whatsapp text-base"></i> Save & Send Test Result to Parents
+            </button>
+          </div>
+        </form>
+      `;
+      openModal(content);
     }
 
-    // ==========================================
-    // 4. ATTENDANCE SYSTEM
-    // ==========================================
-    let currentAttendanceBatch = null;
-    let currentAttendanceDate = new Date().toISOString().split('T')[0];
+    let tempCapturedPaperBase64 = null;
 
+    function previewCapturedPaper(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        tempCapturedPaperBase64 = evt.target.result;
+        document.getElementById('paperPreviewImg').src = tempCapturedPaperBase64;
+        document.getElementById('paperPreviewContainer').classList.remove('hidden');
+        showToast("Paper photo capture ho gayi!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function handleSavePaperAndSendWhatsApp(e, studentId) {
+      e.preventDefault();
+      const testId = document.getElementById('pe_test_id').value;
+      const marks = Number(document.getElementById('pe_marks').value);
+      const remark = document.getElementById('pe_remark').value.trim();
+
+      const s = state.students.find(x => x.id === studentId);
+      const t = state.tests.find(x => x.id === testId);
+
+      const { error } = await client.from('test_scores').upsert({
+        test_id: testId,
+        student_id: studentId,
+        marks_obtained: marks,
+        remarks: remark,
+        paper_image_url: tempCapturedPaperBase64 || null
+      }, { onConflict: 'test_id,student_id' });
+
+      if (error) {
+        showToast("Error saving marks: " + error.message, true);
+        return;
+      }
+
+      showToast("Marks save ho gaye! WhatsApp open ho raha hai...");
+      closeModal();
+      await refreshData();
+
+      const instName = currentInstitute.name || 'CochiHelp';
+      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
+
+      const msg = `*${instName} - Official Test Evaluation*\n\n` +
+        `Namaste ${s.parent_name} ji,\n` +
+        `${s.student_name} (${s.standard}) ka checked test paper evaluate ho chuka hai:\n\n` +
+        `📝 *Test:* ${t.test_name} (${t.subject})\n` +
+        `🎯 *Marks Obtained:* ${marks} / ${t.total_marks}\n` +
+        `📅 *Date:* ${t.test_date}\n` +
+        (remark ? `📌 *Teacher Note:* ${remark}\n` : '') +
+        (tempCapturedPaperBase64 ? `📸 *Notice:* Checked answer-sheet photo portal par record kar li gayi hai.\n` : '') +
+        `\nContact: ${instPhone}\nDhanyawad!`;
+
+      tempCapturedPaperBase64 = null;
+      window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // ================================================================
+    // 4. DAILY ATTENDANCE (DATE-BASED, LOCK & DAILY WHATSAPP)
+    // ================================================================
     function renderAttendanceView(container) {
       if (!currentAttendanceBatch && state.batches.length > 0) {
         currentAttendanceBatch = state.batches[0].id;
@@ -1043,8 +1122,8 @@
       container.innerHTML = `
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
-            <h3 class="text-base font-black text-slate-900">Attendance Register</h3>
-            <p class="text-xs text-slate-500">Submit hone ke baad attendance permanently lock ho jayegi</p>
+            <h3 class="text-base font-black text-slate-900">Daily Attendance Register</h3>
+            <p class="text-xs text-slate-500">Date badalne par automatic new record open hoga</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <select id="att_batch_select" onchange="changeAttendanceBatch(this.value)" class="p-2 text-xs font-bold border-2 border-slate-900 rounded-xl bg-white">
@@ -1057,7 +1136,7 @@
         ${isHoliday ? `
           <div class="p-3 bg-amber-100 border-2 border-amber-800 rounded-2xl flex items-center gap-2 text-xs font-bold text-amber-900">
             <i class="fa-solid fa-umbrella-beach text-base"></i>
-            <span>Aaj Institute Holiday declare hai! Yeh din working days calculation me count nahi hoga.</span>
+            <span>Aaj Institute Holiday hai! Yeh din working lectures mein count nahi hoga.</span>
           </div>
         ` : ''}
 
@@ -1065,9 +1144,11 @@
           <div class="p-3 bg-rose-100 border-2 border-rose-800 rounded-2xl flex items-center justify-between text-xs font-bold text-rose-900">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-lock text-base"></i>
-              <span>Is batch aur date ki attendance LOCKED hai. Koi modification allow nahi hai.</span>
+              <span>Is din ki attendance LOCKED hai. Ab koi isme change nahi kar sakta.</span>
             </div>
-            <span class="text-[10px] bg-rose-200 px-2 py-0.5 rounded">Database Protected</span>
+            <button onclick="broadcastDailyAttendanceWhatsApp()" class="ink-btn bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold">
+              <i class="fa-brands fa-whatsapp"></i> Re-send Daily WhatsApp
+            </button>
           </div>
         ` : ''}
 
@@ -1076,8 +1157,8 @@
             <span class="text-xs font-bold text-slate-600">Students in Batch: <b>${batchStudents.length}</b></span>
             ${!isLocked ? `
               <div class="flex gap-2">
-                <button onclick="markAllAttendance('present')" class="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-1 rounded">Mark All Present</button>
-                <button onclick="markAllAttendance('absent')" class="text-xs bg-rose-100 text-rose-900 font-bold px-2 py-1 rounded">Mark All Absent</button>
+                <button onclick="markAllAttendance('present')" class="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-1 rounded">All Present</button>
+                <button onclick="markAllAttendance('absent')" class="text-xs bg-rose-100 text-rose-900 font-bold px-2 py-1 rounded">All Absent</button>
               </div>
             ` : ''}
           </div>
@@ -1087,26 +1168,26 @@
               <div class="py-2.5 flex items-center justify-between text-xs">
                 <div>
                   <p class="font-bold text-slate-900">${idx + 1}. ${s.student_name}</p>
-                  <p class="text-[10px] text-slate-500">Roll: STD-${s.id.slice(0,4)} &bull; Parent: ${s.parent_phone}</p>
+                  <p class="text-[10px] text-slate-500">Parent WhatsApp: +91 ${s.parent_phone}</p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
                   <label class="flex items-center gap-1 cursor-pointer">
                     <input type="radio" name="att_${s.id}" value="present" ${isLocked ? 'disabled' : ''} checked class="accent-emerald-600 w-4 h-4">
-                    <span class="font-bold text-emerald-700">P</span>
+                    <span class="font-bold text-emerald-700">Present</span>
                   </label>
                   <label class="flex items-center gap-1 cursor-pointer">
                     <input type="radio" name="att_${s.id}" value="absent" ${isLocked ? 'disabled' : ''} class="accent-rose-600 w-4 h-4">
-                    <span class="font-bold text-rose-700">A</span>
+                    <span class="font-bold text-rose-700">Absent</span>
                   </label>
                 </div>
               </div>
             `).join('')}
-            ${batchStudents.length === 0 ? '<p class="text-xs text-slate-400 py-6 text-center">Is batch me koi student nahi hai.</p>' : ''}
+            ${batchStudents.length === 0 ? '<p class="text-xs text-slate-400 py-6 text-center">Batch me koi student nahi hai.</p>' : ''}
 
             ${(!isLocked && batchStudents.length > 0) ? `
               <div class="pt-4 flex justify-end">
                 <button type="submit" id="submitAttBtn" class="ink-btn bg-slate-900 text-amber-300 font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-2">
-                  <i class="fa-solid fa-lock text-xs"></i> Submit & Lock Attendance
+                  <i class="fa-solid fa-lock text-xs"></i> Save Attendance & Lock Permanently
                 </button>
               </div>
             ` : ''}
@@ -1125,11 +1206,11 @@
 
     async function handleSubmitAttendance(e) {
       e.preventDefault();
-      if (!confirm("DHYAN DEIN: Ek baar submit karne ke baad is din ki attendance LOCK ho jayegi aur koi badlav nahi ho sakega. Confirm karein?")) return;
+      if (!confirm("Confirm karein: Ek baar Save karne ke baad yeh din permanently lock ho jayega.")) return;
 
       const btn = document.getElementById('submitAttBtn');
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Locking Attendance...`;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Saving & Locking...`;
 
       const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === currentAttendanceBatch));
       const records = [];
@@ -1152,7 +1233,7 @@
         return;
       }
 
-      const { error: lockErr } = await client.from('attendance_locks').insert([{
+      await client.from('attendance_locks').insert([{
         institute_id: currentInstitute.id,
         batch_id: currentAttendanceBatch,
         attendance_date: currentAttendanceDate,
@@ -1160,17 +1241,36 @@
       }]);
 
       btn.disabled = false;
-      if (lockErr) {
-        showToast("Error locking attendance: " + lockErr.message, true);
-      } else {
-        showToast("Attendance successfully saved and locked!");
-        await refreshData();
-      }
+      showToast("Attendance Saved & Locked! WhatsApp alerts open ho rahe hain...");
+      await refreshData();
+      broadcastDailyAttendanceWhatsApp();
     }
 
-    // ==========================================
-    // 5. STUDENT PROFILE: CALENDAR & MONTHLY WHATSAPP
-    // ==========================================
+    function broadcastDailyAttendanceWhatsApp() {
+      const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === currentAttendanceBatch));
+      const instName = currentInstitute.name || 'CochiHelp';
+
+      batchStudents.forEach((s, idx) => {
+        setTimeout(() => {
+          const radio = document.querySelector(`input[name="att_${s.id}"]:checked`);
+          const status = radio ? radio.value : 'present';
+          const isP = status === 'present';
+
+          const msg = `*${instName} - Daily Attendance Update*\n\n` +
+            `Namaste ${s.parent_name} ji,\n` +
+            `Date: ${currentAttendanceDate}\n` +
+            `Aapka beta/beti *${s.student_name}* (${s.standard}) aaj ke lectures mein *${isP ? 'PRESENT ✅' : 'ABSENT ❌'}* hai.\n\n` +
+            (!isP ? 'Agar koi medical emergency ya leave hai toh kripya institute ko suchit karein.\n' : '') +
+            `Dhanyawad!`;
+
+          window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }, idx * 1200);
+      });
+    }
+
+    // ================================================================
+    // 5. STUDENT PROFILE: BOXES, TREND CHART & MONTHLY REPORT
+    // ================================================================
     let calendarMonth = new Date().getMonth();
     let calendarYear = new Date().getFullYear();
 
@@ -1185,16 +1285,16 @@
         <div class="flex items-center justify-between pb-2 border-b">
           <div>
             <h3 class="text-sm font-black text-slate-900">${s.student_name} (${s.standard})</h3>
-            <p class="text-[10px] text-slate-500">Parent: ${s.parent_name} (+91 ${s.parent_phone})</p>
+            <p class="text-[10px] text-slate-500">Student 360° Monthly Report</p>
           </div>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="space-y-4 text-xs">
-          <!-- Calendar Attendance Grid -->
+          <!-- Calendar Attendance Boxes Grid -->
           <div class="p-3 bg-slate-50 border rounded-2xl space-y-2">
             <div class="flex items-center justify-between">
-              <span class="font-black text-slate-800 uppercase tracking-wider text-[11px]">Monthly Attendance Calendar</span>
+              <span class="font-black text-slate-800 uppercase tracking-wider text-[11px]">Monthly Attendance Boxes</span>
               <div class="flex items-center gap-1">
                 <button onclick="shiftCalendarMonth('${studentId}', -1)" class="p-1 px-2 border rounded bg-white"><i class="fa-solid fa-chevron-left"></i></button>
                 <span class="font-bold text-[11px]">${new Date(calendarYear, calendarMonth).toLocaleString('default', { month: 'short', year: 'numeric' })}</span>
@@ -1204,10 +1304,11 @@
 
             <div id="calendarSummaryBox" class="grid grid-cols-4 gap-1.5 text-center text-[10px]"></div>
             <div id="calendarGrid" class="grid grid-cols-7 gap-1 pt-2"></div>
+            
             <div class="flex items-center justify-center gap-3 pt-1 text-[10px] text-slate-500 font-semibold">
               <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-emerald-500 rounded"></span> Present</span>
               <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-rose-500 rounded"></span> Absent</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-slate-200 border rounded"></span> Holiday / Off</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-slate-200 border rounded"></span> Off / No Lecture</span>
             </div>
           </div>
 
@@ -1217,14 +1318,14 @@
               <span class="font-black text-slate-800 uppercase tracking-wider text-[11px]">Test Scores Performance Trend</span>
               <div class="flex gap-2">
                 <button onclick="sendMonthlyReportWhatsApp('${studentId}')" class="text-xs bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                  <i class="fa-brands fa-whatsapp"></i> Send Report on WhatsApp
+                  <i class="fa-brands fa-whatsapp"></i> WhatsApp
                 </button>
                 <button onclick="downloadStudentMonthlyReport('${studentId}')" class="text-xs bg-slate-900 text-amber-300 font-bold px-2.5 py-1 rounded-lg">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
               </div>
             </div>
-            <div class="h-44 w-full">
+            <div class="h-40 w-full">
               <canvas id="studentPerformanceChart"></canvas>
             </div>
           </div>
@@ -1284,7 +1385,7 @@
       document.getElementById('calendarSummaryBox').innerHTML = `
         <div class="p-1 bg-white border rounded">Present: <b class="text-emerald-700">${presentCount}</b></div>
         <div class="p-1 bg-white border rounded">Absent: <b class="text-rose-700">${absentCount}</b></div>
-        <div class="p-1 bg-white border rounded">Working: <b>${workingDays}</b></div>
+        <div class="p-1 bg-white border rounded">Lectures: <b>${workingDays}</b></div>
         <div class="p-1 bg-white border rounded">Attendance: <b class="${percentage >= 75 ? 'text-emerald-700' : 'text-rose-700'}">${percentage}%</b></div>
       `;
     }
@@ -1295,7 +1396,7 @@
         ctx.font = "11px system-ui";
         ctx.fillStyle = "#94a3b8";
         ctx.textAlign = "center";
-        ctx.fillText("Koi test scores record nahi hain", 150, 80);
+        ctx.fillText("Koi test scores record nahi hain", 150, 75);
         return;
       }
 
@@ -1369,14 +1470,13 @@
 
       const msg = `*${instName} - Monthly Student Performance Report*\n\n` +
         `Namaste ${s.parent_name} ji,\n` +
-        `Yeh ${monthName} ka progress report card hai:\n\n` +
+        `Yeh ${monthName} ka analysis report card hai:\n\n` +
         `👤 *Student:* ${s.student_name} (${s.standard})\n` +
-        `📅 *Working Days:* ${workingDays}\n` +
-        `✅ *Present Days:* ${present}\n` +
+        `📅 *Total Lectures:* ${workingDays}\n` +
+        `✅ *Attended Lectures:* ${present}\n` +
         `📊 *Attendance Percentage:* ${attPct}%\n\n` +
-        `📝 *Test Scores:*\n${testsSummary || '• Is mahine koi test record nahi hua.\n'}\n` +
-        `Kisi bhi query ke liye kripya institute se contact karein: ${instPhone}\n` +
-        `Dhanyawad!`;
+        `📝 *Test Scores:*\n${testsSummary || '• Is mahine koi test attend nahi hua.\n'}\n` +
+        `Contact: ${instPhone}\nDhanyawad!`;
 
       window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
@@ -1448,21 +1548,14 @@
     }
 
     // ==========================================
-    // 6. FEES LEDGER & WHATSAPP
+    // 6. FEES LEDGER, RECEIPTS & VOID CANCEL
     // ==========================================
     function computeStudentPendingBalance(studentId) {
       const s = state.students.find(x => x.id === studentId);
       if (!s) return 0;
-
       const totalFee = Number(s.total_agreed_fee);
-      const discount = state.discounts
-        .filter(d => d.student_id === studentId)
-        .reduce((acc, d) => acc + Number(d.discount_amount), 0);
-
-      const paid = state.payments
-        .filter(p => p.student_id === studentId && p.status === 'active')
-        .reduce((acc, p) => acc + Number(p.amount), 0);
-
+      const discount = state.discounts.filter(d => d.student_id === studentId).reduce((a, d) => a + Number(d.discount_amount), 0);
+      const paid = state.payments.filter(p => p.student_id === studentId && p.status === 'active').reduce((a, p) => a + Number(p.amount), 0);
       return Math.max(0, (totalFee - discount) - paid);
     }
 
@@ -1481,11 +1574,9 @@
             <h3 class="text-base font-black text-slate-900">Fee Ledger & Cash Flow</h3>
             <p class="text-xs text-slate-500">Partial payments, receipts aur overpayment validation</p>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="broadcastFeeRemindersWhatsApp()" class="ink-btn bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5">
-              <i class="fa-brands fa-whatsapp text-sm"></i> Send Reminders (Pending Only)
-            </button>
-          </div>
+          <button onclick="broadcastFeeRemindersWhatsApp()" class="ink-btn bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5">
+            <i class="fa-brands fa-whatsapp text-sm"></i> Send Reminders (Pending Only)
+          </button>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
@@ -1587,7 +1678,7 @@
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Payment Date *</label>
-              <input type="date" id="pay_date" required value="${new Date().toISOString().split('T')[0]}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
+              <input type="date" id="pay_date" required value="${getTodayIndianDate()}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
           </div>
 
@@ -1741,33 +1832,29 @@
     function broadcastFeeRemindersWhatsApp() {
       const overdueStudents = state.students.filter(s => computeStudentPendingBalance(s.id) > 0);
       if (overdueStudents.length === 0) {
-        showToast("Sabhi students ki fees cleared hai!");
+        showToast("Sabhi students ki fees clear hai!");
         return;
       }
 
-      if (!confirm(`Total ${overdueStudents.length} pending students ko WhatsApp reminder open karna chahte hain?`)) return;
-
       const instName = currentInstitute.name || 'CochiHelp';
-      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
-
       overdueStudents.forEach((s, idx) => {
         setTimeout(() => {
           const bal = computeStudentPendingBalance(s.id);
-          const msg = `Namaste ${s.parent_name} ji,\n\nYeh ${instName} ki taraf se notice hai. ${s.student_name} (${s.standard}) ki fee due date nikal chuki hai. Pending balance: INR ${bal.toLocaleString('en-IN')}.\n\nKripya jald se jald fees jama karayein.\nContact: ${instPhone}\nDhanyawad!`;
+          const msg = `Namaste ${s.parent_name} ji,\n\n${instName} notice: ${s.student_name} (${s.standard}) ki fees overdue hai. Pending Balance: ₹${bal.toLocaleString('en-IN')}.\nKripya jald jama karwayein.\nDhanyawad!`;
           window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }, idx * 1200);
       });
     }
 
     // ==========================================
-    // 7. TESTS & IN-APP PAPER PHOTO / CAMERA
+    // 7. TESTS LEDGER
     // ==========================================
     function renderTestsView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-base font-black text-slate-900">Tests & Paper Evaluation</h3>
-            <p class="text-xs text-slate-500">Camera se test paper photo kheenche aur marks WhatsApp karein</p>
+            <h3 class="text-base font-black text-slate-900">Examinations & Tests</h3>
+            <p class="text-xs text-slate-500">Create new tests for batches</p>
           </div>
           <button onclick="openTestModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
             <i class="fa-solid fa-plus mr-1"></i> Add Test
@@ -1777,7 +1864,6 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
           ${state.tests.map(t => {
             const b = state.batches.find(x => x.id === t.batch_id);
-            const recordedCount = state.testScores.filter(sc => sc.test_id === t.id).length;
             return `
               <div class="ink-card p-3.5 bg-white border-slate-800 space-y-2">
                 <div class="flex items-start justify-between">
@@ -1786,18 +1872,12 @@
                     <h4 class="text-sm font-black text-slate-900 mt-1">${t.test_name}</h4>
                     <p class="text-[10px] text-slate-500">Batch: ${b ? b.name : 'N/A'} &bull; Date: ${t.test_date}</p>
                   </div>
-                  <span class="text-xs font-black text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg">Total: ${t.total_marks} Marks</span>
-                </div>
-                <div class="pt-2 border-t flex items-center justify-between text-xs">
-                  <span class="text-slate-500">Scores Recorded: <b>${recordedCount}</b></span>
-                  <button onclick="openRecordMarksAndPaperModal('${t.id}')" class="text-amber-800 font-bold hover:underline flex items-center gap-1">
-                    <i class="fa-solid fa-camera"></i> Enter Marks & Photos
-                  </button>
+                  <span class="text-xs font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-lg">Max: ${t.total_marks} Marks</span>
                 </div>
               </div>
             `;
           }).join('')}
-          ${state.tests.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi test record nahi mila.</p>' : ''}
+          ${state.tests.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi test nahi hai. + Add Test dabayein.</p>' : ''}
         </div>
       `;
     }
@@ -1820,7 +1900,7 @@
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Batch *</label>
-              <select id="tm_batch" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
+              <select id="tm_batch" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white font-semibold">
                 ${state.batches.map(b => `<option value="${b.id}">${b.name} (${b.standard})</option>`).join('')}
               </select>
             </div>
@@ -1832,7 +1912,7 @@
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Test Date *</label>
-              <input type="date" id="tm_date" required value="${new Date().toISOString().split('T')[0]}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
+              <input type="date" id="tm_date" required value="${getTodayIndianDate()}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
           </div>
           <div class="pt-2 flex gap-2">
@@ -1858,113 +1938,10 @@
 
       if (error) showToast(error.message, true);
       else {
-        showToast("Test successfully create ho gaya!");
+        showToast("Test create ho gaya! Ab Students tab se paper photo click karein.");
         closeModal();
         await refreshData();
       }
-    }
-
-    function openRecordMarksAndPaperModal(testId) {
-      const t = state.tests.find(x => x.id === testId);
-      const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === t.batch_id));
-
-      const content = `
-        <div class="flex items-center justify-between pb-2 border-b">
-          <div>
-            <h3 class="text-sm font-black text-slate-900">Marks & Test Paper Photos</h3>
-            <p class="text-[10px] text-slate-500">${t.test_name} (Max Marks: ${t.total_marks})</p>
-          </div>
-          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div class="space-y-3 text-xs max-h-80 overflow-y-auto pr-1 divide-y divide-slate-100">
-          ${batchStudents.map((s, idx) => {
-            const sc = state.testScores.find(x => x.test_id === testId && x.student_id === s.id);
-            const marksVal = sc ? sc.marks_obtained : '';
-            return `
-              <div class="py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2" id="score_row_${s.id}">
-                <div>
-                  <p class="font-bold text-slate-900">${idx + 1}. ${s.student_name}</p>
-                  <p class="text-[10px] text-slate-400">Parent: ${s.parent_name} (+91 ${s.parent_phone})</p>
-                </div>
-                <div class="flex items-center gap-2 self-end sm:self-center">
-                  <input type="number" min="0" max="${t.total_marks}" step="0.5" id="mark_input_${s.id}" value="${marksVal}" placeholder="Marks" class="w-16 p-1.5 border-2 border-slate-900 rounded-lg text-center font-bold">
-                  
-                  <!-- CAMERA INPUT FOR PAPER -->
-                  <label class="cursor-pointer ink-btn bg-slate-100 text-slate-800 px-2 py-1.5 rounded-lg flex items-center gap-1" title="Take photo of checked paper">
-                    <i class="fa-solid fa-camera text-xs"></i>
-                    <span class="text-[10px] font-bold">Photo</span>
-                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handlePaperPhotoCapture(event, '${testId}', '${s.id}')">
-                  </label>
-
-                  <button onclick="saveAndSendPaperToParent('${testId}', '${s.id}')" class="ink-btn bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px] flex items-center gap-1" title="Save & Send to WhatsApp">
-                    <i class="fa-brands fa-whatsapp"></i> Send
-                  </button>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
-      openModal(content);
-    }
-
-    async function handlePaperPhotoCapture(e, testId, studentId) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async function(evt) {
-        const base64Data = evt.target.result;
-        // Save Base64 preview
-        showToast("Photo captured! Ab marks daal kar 'Send' dabayein.");
-        window[`paper_photo_${studentId}`] = base64Data;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function saveAndSendPaperToParent(testId, studentId) {
-      const s = state.students.find(x => x.id === studentId);
-      const t = state.tests.find(x => x.id === testId);
-      const markInput = document.getElementById(`mark_input_${studentId}`);
-      const marksVal = Number(markInput.value);
-
-      if (isNaN(marksVal) || marksVal < 0) {
-        showToast("Kripya valid marks enter karein!", true);
-        return;
-      }
-
-      // Upsert into Supabase
-      const { error } = await client.from('test_scores').upsert({
-        test_id: testId,
-        student_id: studentId,
-        marks_obtained: marksVal,
-        paper_image_url: window[`paper_photo_${studentId}`] || null
-      }, { onConflict: 'test_id,student_id' });
-
-      if (error) {
-        showToast(error.message, true);
-        return;
-      }
-
-      showToast("Marks record ho gaye! WhatsApp open ho raha hai...");
-      await refreshData();
-
-      const instName = currentInstitute.name || 'CochiHelp';
-      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
-      const photoNote = window[`paper_photo_${studentId}`] ? "Checked paper ki image hamare portal me upload kar di gayi hai." : "";
-
-      const msg = `*${instName} - Test Evaluation Result*\n\n` +
-        `Namaste ${s.parent_name} ji,\n` +
-        `${s.student_name} (${s.standard}) ka test result neeche diya gaya hai:\n\n` +
-        `📝 *Test:* ${t.test_name} (${t.subject})\n` +
-        `🎯 *Marks Obtained:* ${marksVal} / ${t.total_marks}\n` +
-        `📅 *Date:* ${t.test_date}\n` +
-        (photoNote ? `📸 *Notice:* ${photoNote}\n` : '') +
-        `\nKisi bhi guidance ke liye contact karein: ${instPhone}\n` +
-        `Dhanyawad!`;
-
-      window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     // ==========================================
@@ -1974,8 +1951,8 @@
       container.innerHTML = `
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-base font-black text-slate-900">Enquiry CRM & Pipeline</h3>
-            <p class="text-xs text-slate-500">Track leads, greetings aur 1-click admission conversion</p>
+            <h3 class="text-base font-black text-slate-900">Enquiries Pipeline</h3>
+            <p class="text-xs text-slate-500">Track admissions & leads</p>
           </div>
           <button onclick="openEnquiryModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
             <i class="fa-solid fa-plus mr-1"></i> New Enquiry
@@ -1989,28 +1966,12 @@
                 <div>
                   <span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded uppercase">${enq.standard}</span>
                   <h4 class="text-sm font-black text-slate-900 mt-1">${enq.student_name}</h4>
-                  <p class="text-[11px] text-slate-500">+91 ${enq.phone} &bull; Source: ${enq.source}</p>
+                  <p class="text-[11px] text-slate-500">+91 ${enq.phone}</p>
                 </div>
-                <select onchange="updateEnquiryStatus('${enq.id}', this.value)" class="text-[10px] font-bold p-1 rounded border border-slate-800 bg-amber-50">
-                  ${['New', 'Follow-up', 'Admitted', 'Not Interested'].map(st => `<option value="${st}" ${enq.status === st ? 'selected' : ''}>${st}</option>`).join('')}
-                </select>
-              </div>
-
-              <p class="text-xs text-slate-600 bg-slate-50 p-2 rounded-xl">${enq.notes || 'No notes added'}</p>
-
-              <div class="pt-2 border-t flex items-center justify-between text-xs">
-                <button onclick="sendEnquiryWhatsAppDirect('${enq.id}')" class="text-emerald-700 font-bold hover:underline flex items-center gap-1">
-                  <i class="fa-brands fa-whatsapp"></i> Welcome Msg
-                </button>
-                ${enq.status !== 'Admitted' ? `
-                  <button onclick="convertEnquiryToAdmission('${enq.id}')" class="text-amber-800 font-black hover:underline">
-                    Convert to Student &rarr;
-                  </button>
-                ` : '<span class="text-[10px] font-bold text-emerald-700">Enrolled</span>'}
               </div>
             </div>
           `).join('')}
-          ${state.enquiries.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi enquiries nahi hain.</p>' : ''}
+          ${state.enquiries.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi enquiry nahi hai.</p>' : ''}
         </div>
       `;
     }
@@ -2023,12 +1984,12 @@
         </div>
         <form onsubmit="handleSaveEnquiry(event)" class="space-y-3 text-xs">
           <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Student / Parent Name *</label>
-            <input type="text" id="eq_name" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Karan Patel">
+            <label class="block font-bold text-slate-800 mb-0.5">Name *</label>
+            <input type="text" id="eq_name" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Student / Parent">
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block font-bold text-slate-800 mb-0.5">WhatsApp Phone (10-Digit) *</label>
+              <label class="block font-bold text-slate-800 mb-0.5">WhatsApp Phone *</label>
               <input type="tel" id="eq_phone" required pattern="^[6-9][0-9]{9}$" maxlength="10" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="9876543210">
             </div>
             <div>
@@ -2038,22 +1999,9 @@
               </select>
             </div>
           </div>
-          <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Source *</label>
-            <select id="eq_source" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
-              <option value="Instagram / Social Media">Instagram / Social Media</option>
-              <option value="Friend / Student Reference">Friend / Student Reference</option>
-              <option value="Banner / Hoarding">Banner / Hoarding</option>
-              <option value="Direct Walk-in">Direct Walk-in</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Enquiry Notes</label>
-            <textarea id="eq_notes" rows="2" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Interested in JEE batches"></textarea>
-          </div>
           <div class="pt-2 flex gap-2">
             <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2 bg-slate-200 font-bold rounded-xl">Cancel</button>
-            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save & Send Welcome</button>
+            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Enquiry</button>
           </div>
         </form>
       `;
@@ -2065,63 +2013,13 @@
       const student_name = document.getElementById('eq_name').value.trim();
       const phone = document.getElementById('eq_phone').value.trim();
       const standard = document.getElementById('eq_standard').value;
-      const source = document.getElementById('eq_source').value;
-      const notes = document.getElementById('eq_notes').value.trim();
 
-      const { data, error } = await client.from('enquiries').insert([{
-        institute_id: currentInstitute.id, student_name, phone, standard, source, notes
-      }]).select().single();
-
-      if (error) showToast(error.message, true);
-      else {
-        showToast("Enquiry saved!");
-        closeModal();
-        await refreshData();
-        sendEnquiryWhatsAppDirect(data.id);
-      }
+      await client.from('enquiries').insert([{ institute_id: currentInstitute.id, student_name, phone, standard, source: 'Walk-in' }]);
+      showToast("Enquiry saved!");
+      closeModal();
+      await refreshData();
     }
 
-    function sendEnquiryWhatsAppDirect(enquiryId) {
-      const enq = state.enquiries.find(x => x.id === enquiryId);
-      if (!enq) return;
-
-      const instName = currentInstitute.name || 'CochiHelp';
-      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
-      const address = currentInstitute.address ? `${currentInstitute.address}, ${currentInstitute.city || ''}` : '';
-
-      const msg = `Namaste ${enq.student_name} ji,\n\n${instName} me enquiry karne ke liye dhanyawad! Hamare yahan ${enq.standard} ke dedicated batches shuru ho rahe hain jisme expert faculty aur regular test series shamil hai.\n\n` +
-        (address ? `📍 *Location:* ${address}\n` : '') +
-        (instPhone ? `📞 *Contact:* ${instPhone}\n` : '') +
-        `\nKripya institute visit karein admission confirm karne ke liye.`;
-
-      window.open(`https://wa.me/91${enq.phone}?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    async function updateEnquiryStatus(enquiryId, status) {
-      const { error } = await client.from('enquiries').update({ status }).eq('id', enquiryId);
-      if (error) showToast(error.message, true);
-      else {
-        showToast(`Status updated to ${status}`);
-        await refreshData();
-      }
-    }
-
-    function convertEnquiryToAdmission(enquiryId) {
-      const enq = state.enquiries.find(x => x.id === enquiryId);
-      if (!enq) return;
-
-      openAdmissionModal(null, {
-        student_name: enq.student_name,
-        standard: enq.standard,
-        student_phone: enq.phone,
-        parent_phone: enq.phone,
-        parent_name: enq.student_name + " (Guardian)"
-      });
-
-      client.from('enquiries').update({ status: 'Admitted' }).eq('id', enquiryId).then(() => refreshData());
-    }
-
-    // Modal Helper
     function openModal(htmlContent) {
       const overlay = document.getElementById('modalOverlay');
       const box = document.getElementById('modalBox');
