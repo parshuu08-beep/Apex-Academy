@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Apex Academy | Management Portal</title>
+  <title>CochiHelp | Coaching Institute Operating System</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,9 +11,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Supabase JS Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
-  <!-- jsPDF & AutoTable for Reports & Receipts -->
+  <!-- jsPDF & AutoTable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- Chart.js for Performance Trends -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -48,8 +48,8 @@
       <div class="w-14 h-14 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center mx-auto border-2 border-slate-900 shadow">
         <i class="fa-solid fa-graduation-cap text-2xl"></i>
       </div>
-      <h1 class="text-2xl font-black text-slate-950 tracking-tight">Apex Academy</h1>
-      <p class="text-xs text-slate-600 font-semibold">Institute Administration Portal</p>
+      <h1 class="text-2xl font-black text-slate-950 tracking-tight">CochiHelp</h1>
+      <p class="text-xs text-slate-600 font-semibold">Institute Administration & ERP</p>
     </div>
 
     <div class="flex border-2 border-slate-900 rounded-xl mb-4 overflow-hidden bg-slate-200 p-1 gap-1">
@@ -60,8 +60,8 @@
     <!-- Login -->
     <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-xs block">
       <div>
-        <label class="block font-bold text-slate-800 mb-1">Email Address</label>
-        <input type="email" id="loginEmail" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="admin@apex.com">
+        <label class="block font-bold text-slate-800 mb-1">Director / Staff Email</label>
+        <input type="email" id="loginEmail" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="admin@coaching.com">
       </div>
       <div>
         <label class="block font-bold text-slate-800 mb-1">Password</label>
@@ -75,12 +75,16 @@
     <!-- Register -->
     <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3.5 text-xs hidden">
       <div>
-        <label class="block font-bold text-slate-800 mb-1">Institute Name</label>
-        <input type="text" id="regInstituteName" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="Apex IIT-JEE Coaching">
+        <label class="block font-bold text-slate-800 mb-1">Coaching Institute Name</label>
+        <input type="text" id="regInstituteName" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="e.g. Mastermind Classes">
+      </div>
+      <div>
+        <label class="block font-bold text-slate-800 mb-1">Official WhatsApp / Contact Phone (10-Digit)</label>
+        <input type="tel" id="regPhone" required pattern="^[6-9][0-9]{9}$" maxlength="10" class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="9876543210">
       </div>
       <div>
         <label class="block font-bold text-slate-800 mb-1">Director Email</label>
-        <input type="email" id="regEmail" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="director@apex.com">
+        <input type="email" id="regEmail" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="director@coaching.com">
       </div>
       <div>
         <label class="block font-bold text-slate-800 mb-1">Password (Min 8 chars)</label>
@@ -93,28 +97,54 @@
   </div>
 
   <!-- MAIN DASHBOARD SHELL -->
-  <div id="mainApp" class="w-full max-w-6xl min-h-[92vh] bg-slate-50 border-4 border-slate-900 rounded-3xl flex-col hidden shadow-2xl my-2 overflow-hidden">
+  <div id="mainApp" class="w-full max-w-6xl min-h-[92vh] bg-slate-50 border-4 border-slate-900 rounded-3xl flex-col hidden shadow-2xl my-2 overflow-hidden relative">
     
     <!-- Header -->
     <header class="bg-slate-900 text-slate-100 px-4 py-3 border-b-2 border-black flex flex-col gap-2">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black">
-            <i class="fa-solid fa-atom"></i>
+          <div id="headerLogoContainer" class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black overflow-hidden border-2 border-slate-800">
+            <i id="defaultLogoIcon" class="fa-solid fa-graduation-cap text-lg"></i>
+            <img id="customInstituteLogo" class="w-full h-full object-cover hidden" alt="Institute Logo">
           </div>
           <div>
-            <h2 id="headerInstituteName" class="text-sm font-black text-amber-300">Apex Academy</h2>
-            <p id="headerUserEmail" class="text-[10px] text-slate-400 font-mono"></p>
+            <h2 id="headerInstituteName" class="text-sm sm:text-base font-black text-amber-300">CochiHelp</h2>
+            <p id="headerInstituteLocation" class="text-[10px] text-slate-400 font-mono"></p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+
+        <div class="flex items-center gap-2 relative">
           <button onclick="refreshData(true)" title="Fetch Latest Data" class="ink-btn bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl flex items-center gap-1">
             <i id="refreshIcon" class="fa-solid fa-rotate text-xs"></i>
             <span class="hidden sm:inline">Refresh</span>
           </button>
-          <button onclick="handleSignOut()" class="ink-btn bg-rose-700 text-white text-xs px-3 py-1.5 rounded-xl font-bold">
-            <i class="fa-solid fa-power-off"></i>
+
+          <!-- KEBAB MENU BUTTON (⋮) -->
+          <button onclick="toggleKebabMenu(event)" id="kebabBtn" class="ink-btn bg-amber-400 text-slate-950 text-xs px-2.5 py-1.5 rounded-xl font-black">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
           </button>
+
+          <!-- KEBAB DROPDOWN MENU -->
+          <div id="kebabDropdown" class="hidden absolute right-0 top-10 w-56 bg-white border-2 border-slate-900 rounded-2xl shadow-2xl py-2 z-50 text-xs text-slate-800 font-semibold space-y-1">
+            <div class="px-3 py-1.5 border-b border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Institute Settings</p>
+              <p id="kebabRoleEmail" class="text-[11px] font-bold text-slate-900 truncate"></p>
+            </div>
+            <button onclick="openInstituteSettingsModal(); hideKebabMenu()" class="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-amber-600"></i> Institute Branding & Details
+            </button>
+            <button onclick="openHolidaysModal(); hideKebabMenu()" class="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-calendar-xmark text-indigo-600"></i> Academic Holidays
+            </button>
+            <button onclick="openExportModal(); hideKebabMenu()" class="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-file-excel text-emerald-600"></i> Export Data (CSV)
+            </button>
+            <div class="border-t border-slate-100 pt-1">
+              <button onclick="handleSignOut()" class="w-full text-left px-3 py-2 text-rose-700 hover:bg-rose-50 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -125,7 +155,7 @@
         <button onclick="setTab('students')" id="nav-students" class="px-3 py-1.5 font-semibold text-slate-300">Students</button>
         <button onclick="setTab('attendance')" id="nav-attendance" class="px-3 py-1.5 font-semibold text-slate-300">Attendance</button>
         <button onclick="setTab('fees')" id="nav-fees" class="px-3 py-1.5 font-semibold text-slate-300">Fees</button>
-        <button onclick="setTab('tests')" id="nav-tests" class="px-3 py-1.5 font-semibold text-slate-300">Tests</button>
+        <button onclick="setTab('tests')" id="nav-tests" class="px-3 py-1.5 font-semibold text-slate-300">Tests & Papers</button>
         <button onclick="setTab('enquiries')" id="nav-enquiries" class="px-3 py-1.5 font-semibold text-slate-300">Enquiries</button>
       </nav>
     </header>
@@ -140,7 +170,6 @@
   </div>
 
   <script>
-    // CONFIGURATION & GLOBAL STATE
     const SUPABASE_CONFIG = {
       url: "https://tscsxhzwfregixatskqp.supabase.co",
       anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3N4aHp3ZnJlZ2l4YXRza3FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTU5ODMsImV4cCI6MjEwODk3MTk4M30.qxv-azvjt8OOuGGBPId6qMVe3lkr_kyHBiinYQKvU6c"
@@ -165,6 +194,12 @@
     };
 
     window.addEventListener('DOMContentLoaded', async () => {
+      window.addEventListener('click', (e) => {
+        if (!e.target.closest('#kebabBtn') && !e.target.closest('#kebabDropdown')) {
+          hideKebabMenu();
+        }
+      });
+
       window.addEventListener('online', () => {
         document.getElementById('offlineBanner').classList.add('hidden');
         refreshData(false);
@@ -182,6 +217,17 @@
         await initWorkspace(session.user);
       }
     });
+
+    function toggleKebabMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('kebabDropdown');
+      menu.classList.toggle('hidden');
+    }
+
+    function hideKebabMenu() {
+      const menu = document.getElementById('kebabDropdown');
+      if (menu) menu.classList.add('hidden');
+    }
 
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toast');
@@ -235,6 +281,7 @@
     async function handleRegister(e) {
       e.preventDefault();
       const instituteName = document.getElementById('regInstituteName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
       const email = document.getElementById('regEmail').value.trim();
       const password = document.getElementById('regPassword').value;
       const btn = document.getElementById('regSubmitBtn');
@@ -244,7 +291,7 @@
       const { data, error } = await client.auth.signUp({
         email,
         password,
-        options: { data: { initial_institute_name: instituteName } }
+        options: { data: { initial_institute_name: instituteName, contact_phone: phone } }
       });
       btn.disabled = false;
       btn.innerHTML = `<i class="fa-solid fa-building-circle-check"></i> Register Institute`;
@@ -252,7 +299,7 @@
       if (error) {
         showToast(error.message, true);
       } else {
-        showToast("Institute account ban gaya! Kripya Sign In karein.");
+        showToast("Institute create ho gaya! Kripya Sign In karein.");
         switchAuthTab('login');
       }
     }
@@ -261,26 +308,44 @@
       currentUser = user;
       const { data: member, error } = await client
         .from('members')
-        .select('institute_id, role, institutes(name)')
+        .select('institute_id, role, institutes(*)')
         .eq('user_id', user.id)
         .single();
 
       if (error || !member) {
-        showToast("Institute mapping nahi mili. Kripya check karein.", true);
+        showToast("Institute mapping nahi mili.", true);
         return;
       }
 
-      currentInstitute = { id: member.institute_id, name: member.institutes.name };
+      currentInstitute = member.institutes;
       currentRole = member.role;
 
-      document.getElementById('headerInstituteName').textContent = currentInstitute.name;
-      document.getElementById('headerUserEmail').textContent = `${currentUser.email} (${currentRole.toUpperCase()})`;
+      updateInstituteHeaderUI();
+      document.getElementById('kebabRoleEmail').textContent = `${currentUser.email} (${currentRole.toUpperCase()})`;
 
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
       document.getElementById('mainApp').classList.add('flex');
 
       await refreshData(false);
+    }
+
+    function updateInstituteHeaderUI() {
+      if (!currentInstitute) return;
+      document.getElementById('headerInstituteName').textContent = currentInstitute.name || 'CochiHelp Institute';
+      const loc = [currentInstitute.address, currentInstitute.city, currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : ''].filter(Boolean).join(' • ');
+      document.getElementById('headerInstituteLocation').textContent = loc || 'Configure in settings (⋮)';
+
+      const logoImg = document.getElementById('customInstituteLogo');
+      const logoIcon = document.getElementById('defaultLogoIcon');
+      if (currentInstitute.logo_url) {
+        logoImg.src = currentInstitute.logo_url;
+        logoImg.classList.remove('hidden');
+        logoIcon.classList.add('hidden');
+      } else {
+        logoImg.classList.add('hidden');
+        logoIcon.classList.remove('hidden');
+      }
     }
 
     async function handleSignOut() {
@@ -302,7 +367,8 @@
           scoresRes,
           paymentsRes,
           discountsRes,
-          enquiriesRes
+          enquiriesRes,
+          instRes
         ] = await Promise.all([
           client.from('batches').select('*').order('name'),
           client.from('students').select('*, student_batches(batch_id)').order('student_name'),
@@ -312,7 +378,8 @@
           client.from('test_scores').select('*'),
           client.from('fee_payments').select('*').order('created_at', { ascending: false }),
           client.from('fee_adjustments').select('*').order('created_at', { ascending: false }),
-          client.from('enquiries').select('*').order('created_at', { ascending: false })
+          client.from('enquiries').select('*').order('created_at', { ascending: false }),
+          client.from('institutes').select('*').eq('id', currentInstitute.id).single()
         ]);
 
         state.batches = batchesRes.data || [];
@@ -324,6 +391,11 @@
         state.payments = paymentsRes.data || [];
         state.discounts = discountsRes.data || [];
         state.enquiries = enquiriesRes.data || [];
+
+        if (instRes.data) {
+          currentInstitute = instRes.data;
+          updateInstituteHeaderUI();
+        }
 
         renderActiveTab();
         if (manual) showToast("Latest data successfully loaded!");
@@ -360,6 +432,142 @@
       else if (activeTab === 'enquiries') renderEnquiriesView(body);
     }
 
+    // ==========================================
+    // KEBAB MENU WORKABLE SETTINGS
+    // ==========================================
+    function openInstituteSettingsModal() {
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <h3 class="text-sm font-black text-slate-900">Institute Branding & Contact Information</h3>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="handleSaveInstituteSettings(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Coaching Institute Name *</label>
+            <input type="text" id="ins_name" required value="${currentInstitute.name || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="e.g. Mastermind Academy">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Institute Contact / WhatsApp Phone *</label>
+              <input type="tel" id="ins_phone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${currentInstitute.contact_phone || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="9876543210">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Tagline / Specialization</label>
+              <input type="text" id="ins_tagline" value="${currentInstitute.tagline || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Excellence in IIT-JEE & Boards">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Logo Image URL</label>
+            <input type="url" id="ins_logo" value="${currentInstitute.logo_url || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="https://example.com/logo.png">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Street Address</label>
+              <input type="text" id="ins_address" value="${currentInstitute.address || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Plot 44, Station Road">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">City / State</label>
+              <input type="text" id="ins_city" value="${currentInstitute.city || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Mumbai, Maharashtra">
+            </div>
+          </div>
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2 bg-slate-200 font-bold rounded-xl">Cancel</button>
+            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Information</button>
+          </div>
+        </form>
+      `;
+      openModal(content);
+    }
+
+    async function handleSaveInstituteSettings(e) {
+      e.preventDefault();
+      const name = document.getElementById('ins_name').value.trim();
+      const contact_phone = document.getElementById('ins_phone').value.trim();
+      const tagline = document.getElementById('ins_tagline').value.trim();
+      const logo_url = document.getElementById('ins_logo').value.trim();
+      const address = document.getElementById('ins_address').value.trim();
+      const city = document.getElementById('ins_city').value.trim();
+
+      const { data, error } = await client
+        .from('institutes')
+        .update({ name, contact_phone, tagline, logo_url, address, city })
+        .eq('id', currentInstitute.id)
+        .select()
+        .single();
+
+      if (error) {
+        showToast("Error saving profile: " + error.message, true);
+      } else {
+        currentInstitute = data;
+        updateInstituteHeaderUI();
+        showToast("Institute information updated!");
+        closeModal();
+      }
+    }
+
+    function openHolidaysModal() {
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <h3 class="text-sm font-black text-slate-900">Academic Holidays List</h3>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="handleSaveHoliday(event)" class="flex gap-2">
+          <input type="date" id="hol_date" required class="p-2 border-2 border-slate-900 rounded-xl text-xs">
+          <input type="text" id="hol_title" required placeholder="Holiday reason (e.g. Diwali)" class="p-2 border-2 border-slate-900 rounded-xl text-xs flex-1">
+          <button type="submit" class="ink-btn bg-slate-900 text-white px-3 py-1 text-xs font-bold rounded-xl">+ Add</button>
+        </form>
+        <div class="divide-y divide-slate-100 max-h-48 overflow-y-auto text-xs">
+          ${state.holidays.map(h => `
+            <div class="py-2 flex items-center justify-between">
+              <div>
+                <p class="font-bold text-slate-900">${h.title}</p>
+                <p class="text-[10px] text-slate-500">${h.holiday_date}</p>
+              </div>
+              <button onclick="deleteHoliday('${h.id}')" class="text-rose-600 hover:text-rose-800 text-xs"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          `).join('') || '<p class="text-xs text-slate-400 py-3 text-center">Koi holiday set nahi hai.</p>'}
+        </div>
+      `;
+      openModal(content);
+    }
+
+    async function handleSaveHoliday(e) {
+      e.preventDefault();
+      const holiday_date = document.getElementById('hol_date').value;
+      const title = document.getElementById('hol_title').value.trim();
+      const { error } = await client.from('holidays').insert([{ institute_id: currentInstitute.id, holiday_date, title }]);
+      if (error) showToast(error.message, true);
+      else {
+        showToast("Holiday added!");
+        await refreshData();
+        openHolidaysModal();
+      }
+    }
+
+    async function deleteHoliday(id) {
+      await client.from('holidays').delete().eq('id', id);
+      await refreshData();
+      openHolidaysModal();
+    }
+
+    function openExportModal() {
+      let csv = "Student Name,Standard,Student Phone,Parent Name,Parent Phone,Total Fee,Pending Fee\n";
+      state.students.forEach(s => {
+        const bal = computeStudentPendingBalance(s.id);
+        csv += `"${s.student_name}","${s.standard}","${s.student_phone}","${s.parent_name}","${s.parent_phone}",${s.total_agreed_fee},${bal}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', `${currentInstitute.name || 'CochiHelp'}_Students.csv`);
+      a.click();
+      showToast("Student roster CSV export downloaded!");
+    }
+
+    // ==========================================
+    // 1. DASHBOARD VIEW
+    // ==========================================
     function renderDashboardView(container) {
       const activeStudents = state.students.filter(s => s.status === 'active');
       const totalStudents = activeStudents.length;
@@ -419,7 +627,7 @@
 
           <div class="ink-card p-4 bg-white space-y-3">
             <div class="flex items-center justify-between pb-2 border-b">
-              <h3 class="text-xs font-black uppercase text-slate-800">Upcoming Fee Dues (Overdue Alert)</h3>
+              <h3 class="text-xs font-black uppercase text-slate-800">Overdue Fee Dues</h3>
               <button onclick="setTab('fees')" class="text-xs text-rose-700 font-bold hover:underline">Fee Ledger</button>
             </div>
             <div class="space-y-2">
@@ -442,6 +650,9 @@
       `;
     }
 
+    // ==========================================
+    // 2. BATCHES VIEW
+    // ==========================================
     function renderBatchesView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
@@ -561,7 +772,7 @@
     }
 
     async function deleteBatch(batchId) {
-      if (!confirm("Kya aap sach me is batch ko delete karna chahte hain?")) return;
+      if (!confirm("Kya aap is batch ko delete karna chahte hain?")) return;
       const { error } = await client.from('batches').delete().eq('id', batchId);
       if (error) showToast(error.message, true);
       else {
@@ -570,6 +781,9 @@
       }
     }
 
+    // ==========================================
+    // 3. STUDENTS VIEW
+    // ==========================================
     function renderStudentsView(container) {
       container.innerHTML = `
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
@@ -623,7 +837,7 @@
 
             <div class="pt-2 border-t flex items-center justify-between text-xs">
               <button onclick="openStudentProfileModal('${s.id}')" class="text-amber-800 font-bold hover:underline">
-                <i class="fa-solid fa-id-card mr-1"></i> Full Profile
+                <i class="fa-solid fa-id-card mr-1"></i> Full Profile & Report
               </button>
               <div class="flex items-center gap-1.5">
                 <button onclick="openAdmissionModal('${s.id}')" class="text-slate-600 hover:text-slate-900 p-1" title="Edit Student"><i class="fa-solid fa-pen text-xs"></i></button>
@@ -667,7 +881,7 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Student Full Name *</label>
-              <input type="text" id="adm_name" required value="${s.student_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Aakash Sharma">
+              <input type="text" id="adm_name" required value="${s.student_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Student Name">
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
@@ -691,7 +905,7 @@
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Parent Name *</label>
-              <input type="text" id="adm_pname" required value="${s.parent_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Parent / Guardian Name">
+              <input type="text" id="adm_pname" required value="${s.parent_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Parent Name">
             </div>
           </div>
 
@@ -702,7 +916,7 @@
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">School / College</label>
-              <input type="text" id="adm_school" value="${s.school || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Delhi Public School">
+              <input type="text" id="adm_school" value="${s.school || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="School Name">
             </div>
           </div>
 
@@ -723,7 +937,7 @@
 
           <div>
             <label class="block font-bold text-slate-800 mb-0.5">Residential Address</label>
-            <input type="text" id="adm_address" value="${s.address || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Flat 402, City">
+            <input type="text" id="adm_address" value="${s.address || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Address">
           </div>
 
           <div class="pt-2 flex gap-2">
@@ -796,13 +1010,13 @@
       const batchInserts = selectedBatchIds.map(bid => ({ student_id: currentStudentId, batch_id: bid }));
       await client.from('student_batches').insert(batchInserts);
 
-      showToast("Admission record successfully saved!");
+      showToast("Admission successfully saved!");
       closeModal();
       await refreshData();
     }
 
     async function deleteStudent(studentId) {
-      if (!confirm("Kya aap sach me is student ko delete karna chahte hain? Sabhi records delete ho jayenge.")) return;
+      if (!confirm("Kya aap sach me is student ko delete karna chahte hain?")) return;
       const { error } = await client.from('students').delete().eq('id', studentId);
       if (error) showToast(error.message, true);
       else {
@@ -811,6 +1025,9 @@
       }
     }
 
+    // ==========================================
+    // 4. ATTENDANCE SYSTEM
+    // ==========================================
     let currentAttendanceBatch = null;
     let currentAttendanceDate = new Date().toISOString().split('T')[0];
 
@@ -908,7 +1125,7 @@
 
     async function handleSubmitAttendance(e) {
       e.preventDefault();
-      if (!confirm("DHYAN DEIN: Ek baar submit karne ke baad is din ki attendance LOCK ho jayegi aur koi badlav nahi ho sakega. Kya aap confirm karte hain?")) return;
+      if (!confirm("DHYAN DEIN: Ek baar submit karne ke baad is din ki attendance LOCK ho jayegi aur koi badlav nahi ho sakega. Confirm karein?")) return;
 
       const btn = document.getElementById('submitAttBtn');
       btn.disabled = true;
@@ -951,6 +1168,9 @@
       }
     }
 
+    // ==========================================
+    // 5. STUDENT PROFILE: CALENDAR & MONTHLY WHATSAPP
+    // ==========================================
     let calendarMonth = new Date().getMonth();
     let calendarYear = new Date().getFullYear();
 
@@ -965,12 +1185,13 @@
         <div class="flex items-center justify-between pb-2 border-b">
           <div>
             <h3 class="text-sm font-black text-slate-900">${s.student_name} (${s.standard})</h3>
-            <p class="text-[10px] text-slate-500">Student 360° Profile & Performance</p>
+            <p class="text-[10px] text-slate-500">Parent: ${s.parent_name} (+91 ${s.parent_phone})</p>
           </div>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="space-y-4 text-xs">
+          <!-- Calendar Attendance Grid -->
           <div class="p-3 bg-slate-50 border rounded-2xl space-y-2">
             <div class="flex items-center justify-between">
               <span class="font-black text-slate-800 uppercase tracking-wider text-[11px]">Monthly Attendance Calendar</span>
@@ -986,16 +1207,22 @@
             <div class="flex items-center justify-center gap-3 pt-1 text-[10px] text-slate-500 font-semibold">
               <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-emerald-500 rounded"></span> Present</span>
               <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-rose-500 rounded"></span> Absent</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-slate-200 border rounded"></span> Holiday / Unrecorded</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-slate-200 border rounded"></span> Holiday / Off</span>
             </div>
           </div>
 
+          <!-- Trend Chart & Monthly WhatsApp Dispatch -->
           <div class="p-3 bg-slate-50 border rounded-2xl space-y-2">
             <div class="flex items-center justify-between">
-              <span class="font-black text-slate-800 uppercase tracking-wider text-[11px]">Test Score Trend (Trading Chart)</span>
-              <button onclick="downloadStudentMonthlyReport('${studentId}')" class="text-xs bg-slate-900 text-amber-300 font-bold px-2.5 py-1 rounded-lg">
-                <i class="fa-solid fa-file-pdf mr-1"></i> Monthly Report PDF
-              </button>
+              <span class="font-black text-slate-800 uppercase tracking-wider text-[11px]">Test Scores Performance Trend</span>
+              <div class="flex gap-2">
+                <button onclick="sendMonthlyReportWhatsApp('${studentId}')" class="text-xs bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                  <i class="fa-brands fa-whatsapp"></i> Send Report on WhatsApp
+                </button>
+                <button onclick="downloadStudentMonthlyReport('${studentId}')" class="text-xs bg-slate-900 text-amber-300 font-bold px-2.5 py-1 rounded-lg">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+              </div>
             </div>
             <div class="h-44 w-full">
               <canvas id="studentPerformanceChart"></canvas>
@@ -1107,6 +1334,53 @@
       });
     }
 
+    async function sendMonthlyReportWhatsApp(studentId) {
+      const s = state.students.find(x => x.id === studentId);
+      if (!s) return;
+
+      const { data: attRecords } = await client.from('attendance_records').select('*').eq('student_id', studentId);
+      const studentScores = state.testScores.filter(sc => sc.student_id === studentId);
+
+      const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+      let present = 0;
+      let holidays = 0;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const rec = (attRecords || []).find(r => r.attendance_date === dateStr);
+        if (rec && rec.status === 'present') present++;
+        if (state.holidays.some(h => h.holiday_date === dateStr)) holidays++;
+      }
+
+      const workingDays = Math.max(1, daysInMonth - holidays);
+      const attPct = Math.round((present / workingDays) * 100);
+
+      let testsSummary = "";
+      studentScores.forEach(sc => {
+        const t = state.tests.find(x => x.id === sc.test_id);
+        if (t) {
+          testsSummary += `• ${t.test_name}: ${sc.marks_obtained}/${t.total_marks} Marks\n`;
+        }
+      });
+
+      const instName = currentInstitute.name || 'CochiHelp';
+      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
+      const monthName = new Date(calendarYear, calendarMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      const msg = `*${instName} - Monthly Student Performance Report*\n\n` +
+        `Namaste ${s.parent_name} ji,\n` +
+        `Yeh ${monthName} ka progress report card hai:\n\n` +
+        `👤 *Student:* ${s.student_name} (${s.standard})\n` +
+        `📅 *Working Days:* ${workingDays}\n` +
+        `✅ *Present Days:* ${present}\n` +
+        `📊 *Attendance Percentage:* ${attPct}%\n\n` +
+        `📝 *Test Scores:*\n${testsSummary || '• Is mahine koi test record nahi hua.\n'}\n` +
+        `Kisi bhi query ke liye kripya institute se contact karein: ${instPhone}\n` +
+        `Dhanyawad!`;
+
+      window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
     async function downloadStudentMonthlyReport(studentId) {
       const s = state.students.find(x => x.id === studentId);
       if (!s || !window.jspdf) return;
@@ -1128,35 +1402,11 @@
       const workingDays = Math.max(1, daysInMonth - holidays);
       const attPct = Math.round((present / workingDays) * 100);
 
-      let performanceObservations = [];
-      if (studentScores.length >= 2) {
-        const lastScore = studentScores[studentScores.length - 1];
-        const prevScore = studentScores[studentScores.length - 2];
-        const lastTest = state.tests.find(t => t.id === lastScore.test_id);
-        const prevTest = state.tests.find(t => t.id === prevScore.test_id);
-
-        const lastPct = (Number(lastScore.marks_obtained) / Number(lastTest.total_marks)) * 100;
-        const prevPct = (Number(prevScore.marks_obtained) / Number(prevTest.total_marks)) * 100;
-        const diff = Math.round(lastPct - prevPct);
-
-        if (diff > 0) {
-          performanceObservations.push(`Is mahine ke aakhiri test (${lastTest.test_name}) me pichle test se ${diff}% score ka improvement darj hua.`);
-        } else if (diff < 0) {
-          performanceObservations.push(`Aakhiri test (${lastTest.test_name}) me pichle test ke mukable ${Math.abs(diff)}% kam marks prapt hue.`);
-        } else {
-          performanceObservations.push(`Dono pichle tests me marks ka percentage barabar raha.`);
-        }
-      } else if (studentScores.length === 1) {
-        performanceObservations.push(`Mahine me 1 test conduct kiya gaya jisme student ne marks prapt kiye.`);
-      } else {
-        performanceObservations.push(`Is mahine me koi formal test record uplabdh nahi hai.`);
-      }
-
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
       doc.setFontSize(16);
-      doc.text(currentInstitute.name, 40, 50);
+      doc.text(currentInstitute.name || 'CochiHelp Institute', 40, 50);
       doc.setFontSize(11);
       doc.text(`Official Monthly Progress Report - ${new Date(calendarYear, calendarMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}`, 40, 70);
       doc.line(40, 80, 550, 80);
@@ -1172,7 +1422,7 @@
 
       doc.line(40, 150, 550, 150);
       doc.setFontSize(12);
-      doc.text("Academic Performance (Test Records)", 40, 175);
+      doc.text("Examination & Test Scores Ledger", 40, 175);
 
       let yPos = 200;
       doc.setFontSize(9);
@@ -1193,21 +1443,13 @@
         }
       });
 
-      yPos += 35;
-      doc.line(40, yPos, 550, yPos);
-      yPos += 20;
-      doc.setFontSize(11);
-      doc.text("Data-Driven Performance Observations (Factual):", 40, yPos);
-      doc.setFontSize(9);
-      performanceObservations.forEach(obs => {
-        yPos += 18;
-        doc.text(`• ${obs}`, 50, yPos);
-      });
-
       doc.save(`${s.student_name}_Monthly_Report.pdf`);
       showToast("Report PDF downloaded!");
     }
 
+    // ==========================================
+    // 6. FEES LEDGER & WHATSAPP
+    // ==========================================
     function computeStudentPendingBalance(studentId) {
       const s = state.students.find(x => x.id === studentId);
       if (!s) return 0;
@@ -1469,7 +1711,7 @@
       const doc = new jsPDF({ unit: 'pt', format: 'a5' });
 
       doc.setFontSize(14);
-      doc.text(currentInstitute.name, 30, 40);
+      doc.text(currentInstitute.name || 'CochiHelp Institute', 30, 40);
       doc.setFontSize(9);
       doc.text("Official Tuition Fee Receipt", 30, 55);
       doc.line(30, 65, 390, 65);
@@ -1505,21 +1747,27 @@
 
       if (!confirm(`Total ${overdueStudents.length} pending students ko WhatsApp reminder open karna chahte hain?`)) return;
 
+      const instName = currentInstitute.name || 'CochiHelp';
+      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
+
       overdueStudents.forEach((s, idx) => {
         setTimeout(() => {
           const bal = computeStudentPendingBalance(s.id);
-          const msg = `Namaste ${s.parent_name} ji,\n\nYeh ${currentInstitute.name} ki taraf se notice hai. ${s.student_name} (${s.standard}) ki fee due date nikal chuki hai. Pending balance: INR ${bal.toLocaleString('en-IN')}.\n\nKripya jald se jald online ya institute aakar fees jama karayein. Dhanyawad!`;
+          const msg = `Namaste ${s.parent_name} ji,\n\nYeh ${instName} ki taraf se notice hai. ${s.student_name} (${s.standard}) ki fee due date nikal chuki hai. Pending balance: INR ${bal.toLocaleString('en-IN')}.\n\nKripya jald se jald fees jama karayein.\nContact: ${instPhone}\nDhanyawad!`;
           window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }, idx * 1200);
       });
     }
 
+    // ==========================================
+    // 7. TESTS & IN-APP PAPER PHOTO / CAMERA
+    // ==========================================
     function renderTestsView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-base font-black text-slate-900">Tests & Examination Ledger</h3>
-            <p class="text-xs text-slate-500">Add tests, record marks aur performance track karein</p>
+            <h3 class="text-base font-black text-slate-900">Tests & Paper Evaluation</h3>
+            <p class="text-xs text-slate-500">Camera se test paper photo kheenche aur marks WhatsApp karein</p>
           </div>
           <button onclick="openTestModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
             <i class="fa-solid fa-plus mr-1"></i> Add Test
@@ -1542,8 +1790,8 @@
                 </div>
                 <div class="pt-2 border-t flex items-center justify-between text-xs">
                   <span class="text-slate-500">Scores Recorded: <b>${recordedCount}</b></span>
-                  <button onclick="openRecordMarksModal('${t.id}')" class="text-amber-800 font-bold hover:underline">
-                    <i class="fa-solid fa-marker mr-1"></i> Enter / Edit Marks
+                  <button onclick="openRecordMarksAndPaperModal('${t.id}')" class="text-amber-800 font-bold hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-camera"></i> Enter Marks & Photos
                   </button>
                 </div>
               </div>
@@ -1616,69 +1864,112 @@
       }
     }
 
-    function openRecordMarksModal(testId) {
+    function openRecordMarksAndPaperModal(testId) {
       const t = state.tests.find(x => x.id === testId);
       const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === t.batch_id));
 
       const content = `
         <div class="flex items-center justify-between pb-2 border-b">
           <div>
-            <h3 class="text-sm font-black text-slate-900">Record Test Marks</h3>
-            <p class="text-[10px] text-slate-500">${t.test_name} (Total: ${t.total_marks} Marks)</p>
+            <h3 class="text-sm font-black text-slate-900">Marks & Test Paper Photos</h3>
+            <p class="text-[10px] text-slate-500">${t.test_name} (Max Marks: ${t.total_marks})</p>
           </div>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <form onsubmit="handleSaveMarks(event, '${testId}')" class="space-y-3 text-xs max-h-72 overflow-y-auto pr-1">
+        <div class="space-y-3 text-xs max-h-80 overflow-y-auto pr-1 divide-y divide-slate-100">
           ${batchStudents.map((s, idx) => {
             const sc = state.testScores.find(x => x.test_id === testId && x.student_id === s.id);
+            const marksVal = sc ? sc.marks_obtained : '';
             return `
-              <div class="py-2 flex items-center justify-between border-b">
+              <div class="py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2" id="score_row_${s.id}">
                 <div>
                   <p class="font-bold text-slate-900">${idx + 1}. ${s.student_name}</p>
+                  <p class="text-[10px] text-slate-400">Parent: ${s.parent_name} (+91 ${s.parent_phone})</p>
                 </div>
-                <div class="w-24">
-                  <input type="number" min="0" max="${t.total_marks}" step="0.5" name="mark_${s.id}" value="${sc ? sc.marks_obtained : ''}" placeholder="/ ${t.total_marks}" class="w-full p-1.5 border-2 border-slate-900 rounded-lg text-center font-bold">
+                <div class="flex items-center gap-2 self-end sm:self-center">
+                  <input type="number" min="0" max="${t.total_marks}" step="0.5" id="mark_input_${s.id}" value="${marksVal}" placeholder="Marks" class="w-16 p-1.5 border-2 border-slate-900 rounded-lg text-center font-bold">
+                  
+                  <!-- CAMERA INPUT FOR PAPER -->
+                  <label class="cursor-pointer ink-btn bg-slate-100 text-slate-800 px-2 py-1.5 rounded-lg flex items-center gap-1" title="Take photo of checked paper">
+                    <i class="fa-solid fa-camera text-xs"></i>
+                    <span class="text-[10px] font-bold">Photo</span>
+                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handlePaperPhotoCapture(event, '${testId}', '${s.id}')">
+                  </label>
+
+                  <button onclick="saveAndSendPaperToParent('${testId}', '${s.id}')" class="ink-btn bg-emerald-700 text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px] flex items-center gap-1" title="Save & Send to WhatsApp">
+                    <i class="fa-brands fa-whatsapp"></i> Send
+                  </button>
                 </div>
               </div>
             `;
           }).join('')}
-          <div class="pt-2">
-            <button type="submit" class="w-full ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save All Marks</button>
-          </div>
-        </form>
+        </div>
       `;
       openModal(content);
     }
 
-    async function handleSaveMarks(e, testId) {
-      e.preventDefault();
-      const t = state.tests.find(x => x.id === testId);
-      const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === t.batch_id));
+    async function handlePaperPhotoCapture(e, testId, studentId) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-      const inserts = [];
-      batchStudents.forEach(s => {
-        const val = document.querySelector(`input[name="mark_${s.id}"]`).value;
-        if (val !== '') {
-          inserts.push({
-            test_id: testId,
-            student_id: s.id,
-            marks_obtained: Number(val)
-          });
-        }
-      });
-
-      if (inserts.length > 0) {
-        const { error } = await client.from('test_scores').upsert(inserts, { onConflict: 'test_id,student_id' });
-        if (error) showToast(error.message, true);
-        else {
-          showToast("Marks successfully save ho gaye!");
-          closeModal();
-          await refreshData();
-        }
-      }
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        const base64Data = evt.target.result;
+        // Save Base64 preview
+        showToast("Photo captured! Ab marks daal kar 'Send' dabayein.");
+        window[`paper_photo_${studentId}`] = base64Data;
+      };
+      reader.readAsDataURL(file);
     }
 
+    async function saveAndSendPaperToParent(testId, studentId) {
+      const s = state.students.find(x => x.id === studentId);
+      const t = state.tests.find(x => x.id === testId);
+      const markInput = document.getElementById(`mark_input_${studentId}`);
+      const marksVal = Number(markInput.value);
+
+      if (isNaN(marksVal) || marksVal < 0) {
+        showToast("Kripya valid marks enter karein!", true);
+        return;
+      }
+
+      // Upsert into Supabase
+      const { error } = await client.from('test_scores').upsert({
+        test_id: testId,
+        student_id: studentId,
+        marks_obtained: marksVal,
+        paper_image_url: window[`paper_photo_${studentId}`] || null
+      }, { onConflict: 'test_id,student_id' });
+
+      if (error) {
+        showToast(error.message, true);
+        return;
+      }
+
+      showToast("Marks record ho gaye! WhatsApp open ho raha hai...");
+      await refreshData();
+
+      const instName = currentInstitute.name || 'CochiHelp';
+      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
+      const photoNote = window[`paper_photo_${studentId}`] ? "Checked paper ki image hamare portal me upload kar di gayi hai." : "";
+
+      const msg = `*${instName} - Test Evaluation Result*\n\n` +
+        `Namaste ${s.parent_name} ji,\n` +
+        `${s.student_name} (${s.standard}) ka test result neeche diya gaya hai:\n\n` +
+        `📝 *Test:* ${t.test_name} (${t.subject})\n` +
+        `🎯 *Marks Obtained:* ${marksVal} / ${t.total_marks}\n` +
+        `📅 *Date:* ${t.test_date}\n` +
+        (photoNote ? `📸 *Notice:* ${photoNote}\n` : '') +
+        `\nKisi bhi guidance ke liye contact karein: ${instPhone}\n` +
+        `Dhanyawad!`;
+
+      window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // ==========================================
+    // 8. ENQUIRIES CRM
+    // ==========================================
     function renderEnquiriesView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
@@ -1794,7 +2085,15 @@
       const enq = state.enquiries.find(x => x.id === enquiryId);
       if (!enq) return;
 
-      const msg = `Namaste ${enq.student_name} ji,\n\n${currentInstitute.name} me enquiry karne ke liye dhanyawad! Hamare yahan ${enq.standard} ke dedicated batches shuru ho rahe hain jisme expert faculty aur periodic test series shamil hai.\n\nBatches aur fee structure ki poori jankari ke liye kripya institute visit karein ya is number par contact karein.`;
+      const instName = currentInstitute.name || 'CochiHelp';
+      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
+      const address = currentInstitute.address ? `${currentInstitute.address}, ${currentInstitute.city || ''}` : '';
+
+      const msg = `Namaste ${enq.student_name} ji,\n\n${instName} me enquiry karne ke liye dhanyawad! Hamare yahan ${enq.standard} ke dedicated batches shuru ho rahe hain jisme expert faculty aur regular test series shamil hai.\n\n` +
+        (address ? `📍 *Location:* ${address}\n` : '') +
+        (instPhone ? `📞 *Contact:* ${instPhone}\n` : '') +
+        `\nKripya institute visit karein admission confirm karne ke liye.`;
+
       window.open(`https://wa.me/91${enq.phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
@@ -1822,6 +2121,7 @@
       client.from('enquiries').update({ status: 'Admitted' }).eq('id', enquiryId).then(() => refreshData());
     }
 
+    // Modal Helper
     function openModal(htmlContent) {
       const overlay = document.getElementById('modalOverlay');
       const box = document.getElementById('modalBox');
