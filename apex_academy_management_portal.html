@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Apex Academy | Coaching Management System</title>
+  
+  <!-- Premium Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Goudy+Bookletter+1911&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sorts+Mill+Goudy&display=swap" rel="stylesheet">
+
+  <!-- Core CDNs -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --paper: #F6F2E5;
+      --paper-card: #FFFFFF;
+      --paper-tint: #EFE9D7;
+      --ink: #1F1B14;
+      --line: #1C1914;
+      --accent: #2E266D;
+      --accent-gold: #D69E2E;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #171512;
+      color: var(--ink);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .font-serif-title { font-family: 'Goudy Bookletter 1911', Georgia, serif; }
+    .font-serif-eyebrow { font-family: 'Sorts Mill Goudy', Georgia, serif; }
+
+    .ink-btn {
+      border: 2px solid var(--line);
+      box-shadow: 0 3px 0 var(--line);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      cursor: pointer;
+    }
+    .ink-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--line);
+    }
+
+    .ink-card {
+      background: var(--paper-card);
+      border: 2px solid var(--line);
+      box-shadow: 0 3px 0 var(--line);
+      border-radius: 16px;
+    }
+
+    .tab-active {
+      background-color: #1C1914 !important;
+      color: #F6F2E5 !important;
+    }
+    .tab-inactive {
+      background-color: #E7E5E4 !important;
+      color: #44403C !important;
+    }
+
+    .meter-fill {
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 lg:p-6">
+
+  <!-- Toast Notification Banner -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none max-w-sm w-full px-4">
+    <div class="bg-stone-900 text-stone-100 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-semibold border-2 border-stone-700">
+      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+      <span id="toastMsg" class="flex-1">Notification</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 1. AUTH SCREEN: LOGIN / SIGNUP WITH DEMO PRE-FILL                         -->
+  <!-- ========================================================================= -->
+  <div id="authContainer" class="w-full max-w-md my-auto p-6 ink-card bg-[#F6F2E5] border-4 border-stone-900 shadow-2xl m-2">
+    <div class="text-center space-y-1.5 mb-5">
+      <div class="w-14 h-14 rounded-2xl bg-stone-900 text-amber-300 flex items-center justify-center mx-auto border-2 border-stone-900 shadow">
+        <i class="fa-solid fa-graduation-cap text-2xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold font-serif-title text-stone-950">Apex Academy</h1>
+      <p class="text-xs text-stone-600">Coaching Institute Management &bull; Multi-Tenant Portal</p>
+    </div>
+
+    <!-- Toggle Buttons -->
+    <div class="flex border-2 border-stone-900 rounded-xl mb-4 overflow-hidden bg-stone-200 p-1 gap-1">
+      <button id="authTabLogin" type="button" onclick="switchAuthTab('login')" class="tab-active flex-1 py-2 text-xs font-bold rounded-lg text-center transition-colors">
+        Sign In
+      </button>
+      <button id="authTabRegister" type="button" onclick="switchAuthTab('register')" class="tab-inactive flex-1 py-2 text-xs font-bold rounded-lg text-center transition-colors">
+        Register Institute
+      </button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3.5 text-xs block">
+      <div>
+        <label class="block font-bold text-stone-800 mb-1">Email Address</label>
+        <input type="email" id="loginEmail" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium focus:outline-none" placeholder="director@apex.com">
+      </div>
+      <div>
+        <label class="block font-bold text-stone-800 mb-1">Password</label>
+        <input type="password" id="loginPassword" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium focus:outline-none" placeholder="••••••••">
+      </div>
+      <button type="submit" class="w-full ink-btn py-3 bg-[#1C1914] text-amber-300 font-bold rounded-xl flex items-center justify-center gap-2">
+        <i class="fa-solid fa-lock text-xs"></i> Enter Workspace
+      </button>
+    </form>
+
+    <!-- Register Form -->
+    <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3 text-xs hidden">
+      <div>
+        <label class="block font-bold text-stone-800 mb-1">Coaching Institute Name</label>
+        <input type="text" id="regInstituteName" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium" placeholder="Apex IIT-JEE Classes">
+      </div>
+      <div>
+        <label class="block font-bold text-stone-800 mb-1">Owner Email</label>
+        <input type="email" id="regEmail" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium" placeholder="director@apex.com">
+      </div>
+      <div>
+        <label class="block font-bold text-stone-800 mb-1">Password (Min 8 chars, 1 num, 1 sym)</label>
+        <input type="password" id="regPassword" required minlength="8" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium" placeholder="••••••••">
+      </div>
+      <button type="submit" class="w-full ink-btn py-3 bg-[#1C1914] text-emerald-400 font-bold rounded-xl flex items-center justify-center gap-2">
+        <i class="fa-solid fa-building-circle-check text-xs"></i> Create Institute & Account
+      </button>
+    </form>
+
+    <!-- Instant Sandbox Preview Bypass -->
+    <div class="mt-5 pt-3 border-t-2 border-stone-300 text-center">
+      <button type="button" onclick="loadSandboxMode()" class="w-full ink-btn py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5">
+        <i class="fa-solid fa-bolt text-amber-600"></i> Explore Live Preview Mode (Instant Demo)
+      </button>
+      <p class="text-[10px] text-stone-500 mt-1.5">Use your Supabase login or test in live preview mode.</p>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN APPLICATION WORKSPACE                                             -->
+  <!-- ========================================================================= -->
+  <div id="mainAppShell" class="w-full max-w-6xl min-h-[92vh] bg-[#F6F2E5] border-4 border-stone-900 rounded-3xl flex-col hidden shadow-2xl my-2 overflow-hidden">
+    
+    <!-- Header Bar -->
+    <header class="bg-[#1C1914] text-[#F6F2E5] px-4 sm:px-6 py-3.5 border-b-2 border-black flex-shrink-0 z-20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-400/20 border-2 border-amber-400/60 flex items-center justify-center text-amber-300">
+            <i class="fa-solid fa-graduation-cap text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-sm sm:text-base font-bold font-serif-title flex items-center gap-2 leading-none">
+              <span id="displayInstituteName">Apex Academy</span>
+              <span id="userRoleBadge" class="text-[9px] bg-amber-400 text-stone-950 font-black px-1.5 py-0.5 rounded uppercase">Owner</span>
+            </h1>
+            <p id="displayUserEmail" class="text-[11px] text-stone-400 mt-1 font-mono">director@apex.com</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="openStudentModal()" class="ink-btn bg-amber-400 hover:bg-amber-300 text-stone-950 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+            <i class="fa-solid fa-user-plus text-[11px]"></i> Add Student
+          </button>
+          <button type="button" onclick="handleSignOut()" class="ink-btn bg-rose-900 text-white hover:bg-rose-800 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="mt-3 flex flex-col md:flex-row md:items-center gap-2.5">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-stone-400"></i>
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search student name, roll number, or mother's phone..."
+                 class="w-full bg-stone-800/90 text-stone-100 placeholder-stone-400 text-xs pl-8 pr-3 py-2 rounded-xl border border-stone-700 focus:outline-none focus:border-amber-400">
+        </div>
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <button type="button" onclick="filterByClass('all')" id="btn-cls-all" class="class-filter-btn px-3 py-1 text-[11px] font-bold rounded-lg bg-amber-400 text-stone-950 border border-stone-900 whitespace-nowrap ink-btn">All Classes</button>
+          <button type="button" onclick="filterByClass('Class 9th')" id="btn-cls-9" class="class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap">Class 9th</button>
+          <button type="button" onclick="filterByClass('Class 10th')" id="btn-cls-10" class="class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap">Class 10th</button>
+          <button type="button" onclick="filterByClass('Class 11th')" id="btn-cls-11" class="class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap">Class 11th</button>
+          <button type="button" onclick="filterByClass('Class 12th')" id="btn-cls-12" class="class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap">Class 12th</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sub-header Ribbon -->
+    <div class="bg-[#EFE9D7] border-b-2 border-stone-900/15 px-4 sm:px-6 py-2 flex items-center justify-between text-xs text-stone-800">
+      <span class="font-medium">Selected Batch: <strong id="activeBatchText" class="font-bold">All Classes</strong></span>
+      <span class="text-[11px] font-bold text-stone-800 bg-stone-200 px-2.5 py-0.5 rounded-full border border-stone-300" id="rosterCountBadge">0 Students</span>
+    </div>
+
+    <!-- Main Dynamic Content Workspace -->
+    <main id="mainContainer" class="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-6 space-y-4 pb-24">
+      <!-- Injected Dynamically -->
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="sticky bottom-0 left-0 right-0 bg-[#1C1914] border-t-2 border-black px-4 py-2.5 flex justify-around items-center z-20">
+      <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center gap-0.5 text-amber-400 p-1">
+        <i class="fa-solid fa-chart-pie text-base"></i>
+        <span class="text-[10px] sm:text-xs font-bold">Dashboard</span>
+      </button>
+      <button type="button" onclick="switchTab('fees')" id="nav-fees" class="flex flex-col items-center gap-0.5 text-stone-400 p-1">
+        <i class="fa-solid fa-wallet text-base"></i>
+        <span class="text-[10px] sm:text-xs font-bold">Fees</span>
+      </button>
+      <button type="button" onclick="switchTab('attendance')" id="nav-attendance" class="flex flex-col items-center gap-0.5 text-stone-400 p-1">
+        <i class="fa-solid fa-calendar-check text-base"></i>
+        <span class="text-[10px] sm:text-xs font-bold">Attendance</span>
+      </button>
+      <button type="button" onclick="switchTab('students')" id="nav-students" class="flex flex-col items-center gap-0.5 text-stone-400 p-1">
+        <i class="fa-solid fa-users text-base"></i>
+        <span class="text-[10px] sm:text-xs font-bold">Students</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3. MODALS (STUDENT ENROLLMENT, FEE PAYMENT, PRIVACY NOTICE)                -->
+  <!-- ========================================================================= -->
+
+  <!-- Modal: Add Student & Statutory Consent -->
+  <div id="studentModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#F6F2E5] w-full max-w-lg rounded-2xl max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border-4 border-stone-900 space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b-2 border-stone-900">
+        <h3 class="text-base font-bold font-serif-title text-stone-950">Enroll Minor & Record Consent</h3>
+        <button type="button" onclick="closeStudentModal()" class="text-stone-700 text-base hover:text-black"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="studentForm" onsubmit="handleSaveStudent(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-stone-800 mb-1">Student Full Name * (Class 9-12)</label>
+          <input type="text" id="formName" required maxlength="100" placeholder="e.g. Aryan Sharma" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-stone-800 mb-1">Grade Level *</label>
+            <select id="formClass" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
+              <option value="Class 9th">Class 9th</option>
+              <option value="Class 10th">Class 10th</option>
+              <option value="Class 11th">Class 11th</option>
+              <option value="Class 12th">Class 12th</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-800 mb-1">Roll / ID Number *</label>
+            <input type="text" id="formRoll" required maxlength="20" placeholder="APX-101" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-stone-800 mb-1">Guardian / Mother Name *</label>
+            <input type="text" id="formGuardianName" required maxlength="100" placeholder="Sunita Sharma" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-800 mb-1">Mother WhatsApp (10-Digit) *</label>
+            <input type="tel" id="formPhone" required pattern="^[6-9]\d{9}$" maxlength="10" placeholder="9876543210" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
+          </div>
+        </div>
+
+        <div class="ink-card p-3 bg-amber-50 border-stone-900 space-y-2">
+          <span class="text-[11px] font-bold text-stone-900 uppercase">Fee Agreement</span>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-semibold text-stone-700">Total Agreed Fee (₹) *</label>
+              <input type="number" id="formTotalFee" required min="0" max="1000000" placeholder="30000" class="w-full p-2 rounded-lg border-2 border-stone-900 bg-white font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-stone-700">Initial Payment (₹)</label>
+              <input type="number" id="formInitialPayment" min="0" value="0" class="w-full p-2 rounded-lg border-2 border-stone-900 bg-white font-bold">
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white rounded-xl border-2 border-stone-900 space-y-2">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="formConsentCheck" required checked class="w-4 h-4 accent-stone-900">
+            <label for="formConsentCheck" class="text-[11px] font-bold text-stone-900 leading-tight">
+              Statutory Guardian Consent Confirmed (DPDP Act)
+            </label>
+          </div>
+          <p class="text-[10px] text-stone-600 leading-normal pl-6">
+            The legal guardian has reviewed the Privacy Policy and provided consent to record attendance, performance, and receive fee notices.
+          </p>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeStudentModal()" class="ink-btn w-1/2 py-2.5 font-bold text-stone-800 bg-stone-200 rounded-xl">Cancel</button>
+          <button type="submit" class="ink-btn w-1/2 py-2.5 font-bold text-white bg-stone-900 rounded-xl">Save to Ledger</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Pay Fee & Generate Receipt -->
+  <div id="feeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#F6F2E5] w-full max-w-sm rounded-2xl p-4 sm:p-5 shadow-2xl border-4 border-stone-900 space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b-2 border-stone-900">
+        <h3 class="text-sm font-bold font-serif-title text-stone-950">Record Fee Collection</h3>
+        <button type="button" onclick="closeFeeModal()" class="text-stone-700"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="feeForm" onsubmit="handleRecordFee(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="feeStudentId">
+        <div class="ink-card p-3 bg-white">
+          <p class="font-bold text-stone-900" id="feeStudentName">Student</p>
+          <p class="text-xs font-semibold text-rose-700 mt-0.5">Remaining Due: <span id="feeRemainingDisplay">₹0</span></p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-800 mb-1">Receiving Amount (₹) *</label>
+          <input type="number" id="feeAmount" required min="1" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-bold">
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-800 mb-1">Payment Mode *</label>
+          <select id="feeMode" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-semibold">
+            <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
+            <option value="Cash">Cash in Hand</option>
+            <option value="Bank Transfer">Bank Transfer / NEFT</option>
+          </select>
+        </div>
+
+        <div class="pt-1 flex gap-2">
+          <button type="button" onclick="closeFeeModal()" class="ink-btn w-1/2 py-2.5 font-bold bg-stone-200 rounded-xl">Cancel</button>
+          <button type="submit" class="ink-btn w-1/2 py-2.5 font-bold text-white bg-emerald-800 rounded-xl">Commit & PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // APEX ACADEMY CLIENT CORE (WORKS WITH LIVE SUPABASE OR PREVIEW MODE)
+    // =========================================================================
+    const SUPABASE_CONFIG = {
+      url: "https://tscsxhzwfregixatskqp.supabase.co",
+      anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3N4aHp3ZnJlZ2l4YXRza3FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTU5ODMsImV4cCI6MjEwODk3MTk4M30.qxv-azvjt8OOuGGBPId6qMVe3lkr_kyHBiinYQKvU6c"
+    };
+
+    let supabase = null;
+    let currentMembership = { institute_id: 'demo-inst-1', role: 'owner', institute_name: 'Apex Academy (Live Preview)' };
+    let studentsCache = [];
+    let currentTab = 'dashboard';
+    let selectedClass = 'all';
+    let searchQuery = '';
+
+    // Initial Mock Roster for immediate interactive Preview
+    const INITIAL_PREVIEW_ROSTER = [
+      {
+        id: "std-001",
+        institute_id: "demo-inst-1",
+        full_name: "Aarav Sharma",
+        grade_level: "Class 10th",
+        roll_number: "APX-101",
+        guardian_name: "Sunita Sharma",
+        guardian_phone: "9820123456",
+        total_agreed_fee: 35000,
+        total_paid: 20000,
+        balance_due: 15000,
+        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'present' }]
+      },
+      {
+        id: "std-002",
+        institute_id: "demo-inst-1",
+        full_name: "Rhea Deshmukh",
+        grade_level: "Class 12th",
+        roll_number: "APX-102",
+        guardian_name: "Kavita Deshmukh",
+        guardian_phone: "9833445566",
+        total_agreed_fee: 45000,
+        total_paid: 45000,
+        balance_due: 0,
+        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'present' }]
+      },
+      {
+        id: "std-003",
+        institute_id: "demo-inst-1",
+        full_name: "Aditya Patil",
+        grade_level: "Class 11th",
+        roll_number: "APX-103",
+        guardian_name: "Pooja Patil",
+        guardian_phone: "9766554433",
+        total_agreed_fee: 40000,
+        total_paid: 15000,
+        balance_due: 25000,
+        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'late' }]
+      },
+      {
+        id: "std-004",
+        institute_id: "demo-inst-1",
+        full_name: "Meera Nair",
+        grade_level: "Class 9th",
+        roll_number: "APX-104",
+        guardian_name: "Anjali Nair",
+        guardian_phone: "9892001122",
+        total_agreed_fee: 28000,
+        total_paid: 28000,
+        balance_due: 0,
+        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'present' }]
+      }
+    ];
+
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const text = document.getElementById('toastMsg');
+      
+      text.textContent = msg;
+      icon.className = isError 
+        ? 'fa-solid fa-circle-exclamation text-rose-400 text-sm' 
+        : 'fa-solid fa-circle-check text-emerald-400 text-sm';
+
+      t.classList.remove('opacity-0', '-translate-y-24', 'pointer-events-none');
+      t.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        t.classList.add('opacity-0', '-translate-y-24', 'pointer-events-none');
+        t.classList.remove('opacity-100', 'translate-y-0');
+      }, 3000);
+    }
+
+    function formatINR(val) {
+      return '₹' + Number(val || 0).toLocaleString('en-IN');
+    }
+
+    function switchAuthTab(type) {
+      const loginTab = document.getElementById('authTabLogin');
+      const regTab = document.getElementById('authTabRegister');
+      const loginForm = document.getElementById('loginForm');
+      const regForm = document.getElementById('registerForm');
+
+      if (type === 'login') {
+        loginTab.className = 'tab-active flex-1 py-2 text-xs font-bold rounded-lg text-center';
+        regTab.className = 'tab-inactive flex-1 py-2 text-xs font-bold rounded-lg text-center';
+        loginForm.classList.remove('hidden');
+        loginForm.classList.add('block');
+        regForm.classList.remove('block');
+        regForm.classList.add('hidden');
+      } else {
+        regTab.className = 'tab-active flex-1 py-2 text-xs font-bold rounded-lg text-center';
+        loginTab.className = 'tab-inactive flex-1 py-2 text-xs font-bold rounded-lg text-center';
+        regForm.classList.remove('hidden');
+        regForm.classList.add('block');
+        loginForm.classList.remove('block');
+        loginForm.classList.add('hidden');
+      }
+    }
+
+    // --- APPLICATION STARTUP ---
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+          supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+          
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            await handleAuthenticatedUser(session.user);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Direct cloud link notice:", e.message);
+      }
+    });
+
+    function loadSandboxMode() {
+      studentsCache = [...INITIAL_PREVIEW_ROSTER];
+      document.getElementById('authContainer').classList.add('hidden');
+      document.getElementById('mainAppShell').classList.remove('hidden');
+      document.getElementById('mainAppShell').classList.add('flex');
+      
+      document.getElementById('displayInstituteName').textContent = currentMembership.institute_name;
+      document.getElementById('displayUserEmail').textContent = 'director@apex.com';
+      document.getElementById('userRoleBadge').textContent = 'Owner';
+      
+      showToast("Live Preview Mode initialized!");
+      renderActiveView();
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!supabase) {
+        loadSandboxMode();
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        await handleAuthenticatedUser(data.user);
+      } catch (err) {
+        showToast(err.message || "Failed to authenticate.", true);
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const instituteName = document.getElementById('regInstituteName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+
+      if (!supabase) {
+        currentMembership.institute_name = instituteName;
+        loadSandboxMode();
+        return;
+      }
+
+      try {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { initial_institute_name: instituteName } }
+        });
+        if (error) throw error;
+        showToast("Registration submitted! Please verify email or sign in.");
+        switchAuthTab('login');
+      } catch (err) {
+        showToast(err.message || "Registration rejected.", true);
+      }
+    }
+
+    async function handleAuthenticatedUser(user) {
+      try {
+        const { data: memberData } = await supabase
+          .from('members')
+          .select('institute_id, role, institutes(name)')
+          .eq('user_id', user.id)
+          .single();
+
+        if (memberData) {
+          currentMembership = {
+            institute_id: memberData.institute_id,
+            role: memberData.role,
+            institute_name: memberData.institutes.name
+          };
+        }
+      } catch(e) {}
+
+      document.getElementById('authContainer').classList.add('hidden');
+      document.getElementById('mainAppShell').classList.remove('hidden');
+      document.getElementById('mainAppShell').classList.add('flex');
+
+      document.getElementById('displayInstituteName').textContent = currentMembership.institute_name;
+      document.getElementById('displayUserEmail').textContent = user.email;
+      document.getElementById('userRoleBadge').textContent = currentMembership.role;
+
+      await loadCloudData();
+    }
+
+    async function loadCloudData() {
+      if (!supabase) return;
+      try {
+        const { data: students, error } = await supabase
+          .from('students')
+          .select(`
+            id, full_name, grade_level, roll_number, guardian_name, guardian_phone, total_agreed_fee,
+            fee_transactions(amount_paid),
+            attendance_records(date, status)
+          `)
+          .order('created_at', { ascending: false });
+
+        if (!error && students && students.length > 0) {
+          studentsCache = students.map(s => {
+            const paid = (s.fee_transactions || []).reduce((acc, t) => acc + Number(t.amount_paid), 0);
+            return {
+              ...s,
+              total_paid: paid,
+              balance_due: Math.max(0, Number(s.total_agreed_fee) - paid)
+            };
+          });
+        } else if (studentsCache.length === 0) {
+          studentsCache = [...INITIAL_PREVIEW_ROSTER];
+        }
+      } catch (err) {
+        if (studentsCache.length === 0) studentsCache = [...INITIAL_PREVIEW_ROSTER];
+      }
+      renderActiveView();
+    }
+
+    function handleSignOut() {
+      if (supabase) supabase.auth.signOut();
+      document.getElementById('mainAppShell').classList.add('hidden');
+      document.getElementById('mainAppShell').classList.remove('flex');
+      document.getElementById('authContainer').classList.remove('hidden');
+      showToast("Signed out safely.");
+    }
+
+    // --- NAVIGATION & FILTERS ---
+    function switchTab(t) {
+      currentTab = t;
+      ['dashboard', 'fees', 'attendance', 'students'].forEach(id => {
+        const btn = document.getElementById('nav-' + id);
+        if (btn) {
+          btn.className = (id === t) 
+            ? 'flex flex-col items-center gap-0.5 text-amber-400 p-1' 
+            : 'flex flex-col items-center gap-0.5 text-stone-400 p-1';
+        }
+      });
+      renderActiveView();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderActiveView();
+    }
+
+    function filterByClass(cls) {
+      selectedClass = cls;
+      const classMap = {
+        'all': 'btn-cls-all',
+        'Class 9th': 'btn-cls-9',
+        'Class 10th': 'btn-cls-10',
+        'Class 11th': 'btn-cls-11',
+        'Class 12th': 'btn-cls-12'
+      };
+
+      Object.entries(classMap).forEach(([key, btnId]) => {
+        const b = document.getElementById(btnId);
+        if (b) {
+          b.className = (key === cls)
+            ? 'class-filter-btn px-3 py-1 text-[11px] font-bold rounded-lg bg-amber-400 text-stone-950 border border-stone-900 whitespace-nowrap ink-btn'
+            : 'class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap';
+        }
+      });
+
+      document.getElementById('activeBatchText').textContent = cls === 'all' ? 'All Classes' : cls;
+      renderActiveView();
+    }
+
+    function getFilteredList() {
+      let list = studentsCache;
+      if (selectedClass !== 'all') {
+        list = list.filter(s => s.grade_level === selectedClass);
+      }
+      if (searchQuery) {
+        list = list.filter(s =>
+          s.full_name.toLowerCase().includes(searchQuery) ||
+          s.roll_number.toLowerCase().includes(searchQuery) ||
+          s.guardian_phone.includes(searchQuery)
+        );
+      }
+      return list;
+    }
+
+    function renderActiveView() {
+      const container = document.getElementById('mainContainer');
+      const list = getFilteredList();
+
+      document.getElementById('rosterCountBadge').textContent = `${list.length} Student${list.length === 1 ? '' : 's'}`;
+      container.innerHTML = '';
+
+      if (currentTab === 'dashboard') renderDashboardView(container, list);
+      else if (currentTab === 'fees') renderFeesView(container, list);
+      else if (currentTab === 'attendance') renderAttendanceView(container, list);
+      else if (currentTab === 'students') renderStudentsView(container, list);
+    }
+
+    // --- VIEW 1: DASHBOARD ---
+    function renderDashboardView(container, list) {
+      const totalExpected = list.reduce((a, s) => a + Number(s.total_agreed_fee), 0);
+      const totalCollected = list.reduce((a, s) => a + Number(s.total_paid), 0);
+      const totalPending = Math.max(0, totalExpected - totalCollected);
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      const presentCount = list.filter(s => 
+        (s.attendance_records || []).some(a => a.date === todayStr && a.status === 'present')
+      ).length;
+      const turnoutRate = list.length ? Math.round((presentCount / list.length) * 100) : 0;
+      const pendingStudents = list.filter(s => s.balance_due > 0);
+
+      container.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div onclick="switchTab('fees')" class="ink-card p-4 bg-rose-900 text-white cursor-pointer active:scale-95 transition-transform flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-rose-200">Pending Tuition</span>
+              <h3 class="text-2xl font-black mt-1 leading-tight">${formatINR(totalPending)}</h3>
+            </div>
+            <p class="text-[11px] text-rose-200 mt-2 flex items-center gap-1.5 font-semibold">
+              <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i> WhatsApp mother alert queue
+            </p>
+          </div>
+
+          <div class="ink-card p-4 bg-white flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-stone-600">Total Collected</span>
+              <h3 class="text-2xl font-bold text-stone-900 mt-1 leading-tight">${formatINR(totalCollected)}</h3>
+            </div>
+            <div class="mt-2">
+              <div class="flex justify-between text-[10px] text-stone-500 font-semibold mb-1">
+                <span>Progress</span>
+                <span>${totalExpected ? Math.round((totalCollected / totalExpected) * 100) : 0}%</span>
+              </div>
+              <div class="w-full bg-stone-200 h-2.5 rounded-full overflow-hidden border border-stone-300">
+                <div class="bg-emerald-600 h-full meter-fill" style="width: ${totalExpected ? Math.round((totalCollected / totalExpected) * 100) : 0}%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="switchTab('attendance')" class="ink-card p-4 bg-white cursor-pointer hover:border-amber-500 transition-colors flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-stone-600">Today's Turnout</span>
+                <h4 class="text-base font-extrabold text-stone-900 mt-0.5">${presentCount} of ${list.length} Present</h4>
+              </div>
+              <div class="text-right">
+                <span class="text-2xl font-black text-indigo-950">${turnoutRate}%</span>
+              </div>
+            </div>
+            <div class="w-full bg-stone-200 h-2.5 rounded-full mt-2 overflow-hidden border border-stone-300">
+              <div class="bg-indigo-950 h-full meter-fill" style="width: ${turnoutRate}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ink-card p-4 bg-white space-y-3 mt-4">
+          <div class="flex items-center justify-between pb-2 border-b-2 border-stone-100">
+            <h3 class="text-xs sm:text-sm font-bold text-stone-900 uppercase tracking-wide flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+              Mother Tuition Alert Queue
+            </h3>
+            <button onclick="switchTab('fees')" class="text-xs font-bold text-indigo-950 hover:underline">View All &rarr;</button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            ${pendingStudents.slice(0, 6).map(s => `
+              <div class="p-3 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between">
+                <div>
+                  <h5 class="text-xs font-bold text-stone-900">${s.full_name} <span class="text-[10px] text-stone-500 font-normal">(${s.grade_level})</span></h5>
+                  <p class="text-[11px] text-stone-600 font-medium">Guardian: <strong>${s.guardian_name}</strong></p>
+                  <p class="text-[10px] font-black text-rose-700 mt-0.5">Due: ${formatINR(s.balance_due)}</p>
+                </div>
+                <button onclick="sendWhatsAppReminder('${s.id}')" class="ink-btn bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                  <i class="fa-brands fa-whatsapp text-xs"></i> Alert
+                </button>
+              </div>
+            `).join('')}
+            ${pendingStudents.length === 0 ? '<p class="col-span-full text-center py-4 text-xs font-semibold text-emerald-700">All registered tuition fees are settled!</p>' : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // --- VIEW 2: FEES LEDGER & PDF RECEIPTS ---
+    function renderFeesView(container, list) {
+      container.innerHTML = `
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm sm:text-base font-bold font-serif-title text-stone-950">Tuition Ledger & Collections</h2>
+          <span class="text-xs font-bold text-rose-700 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-lg">
+            ${list.filter(s => s.balance_due > 0).length} Outstanding
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-2">
+          ${list.map(s => {
+            const isCleared = s.balance_due === 0;
+            const pct = Math.round((s.total_paid / (s.total_agreed_fee || 1)) * 100);
+
+            return `
+              <div class="ink-card p-4 bg-white flex flex-col justify-between space-y-3">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-xs sm:text-sm font-bold text-stone-900">${s.full_name}</h3>
+                      <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isCleared ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                        ${isCleared ? 'Cleared' : 'Pending'}
+                      </span>
+                    </div>
+                    <p class="text-[11px] text-stone-600 mt-0.5">Mother: <strong>${s.guardian_name}</strong> &bull; ${s.grade_level}</p>
+                    <p class="text-[10px] text-stone-500">Phone: +91 ${s.guardian_phone}</p>
+                  </div>
+
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="downloadPdfReceipt('${s.id}')" class="ink-btn bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                      <i class="fa-solid fa-file-pdf text-rose-600"></i> PDF
+                    </button>
+                    <button onclick="openFeeModal('${s.id}')" class="ink-btn bg-amber-400 hover:bg-amber-300 text-stone-950 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+                      + Pay
+                    </button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 bg-[#F6F2E5] p-2.5 rounded-xl text-center border border-stone-200 text-xs">
+                  <div>
+                    <span class="text-[10px] text-stone-500 font-semibold">Total</span>
+                    <p class="font-bold text-stone-900">${formatINR(s.total_agreed_fee)}</p>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-emerald-700 font-semibold">Paid</span>
+                    <p class="font-bold text-emerald-800">${formatINR(s.total_paid)}</p>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-rose-700 font-semibold">Due</span>
+                    <p class="font-black ${isCleared ? 'text-stone-400' : 'text-rose-700'}">${formatINR(s.balance_due)}</p>
+                  </div>
+                </div>
+
+                <div class="w-full bg-stone-200 h-2 rounded-full overflow-hidden">
+                  <div class="${isCleared ? 'bg-emerald-600' : 'bg-rose-600'} h-full meter-fill" style="width: ${pct}%"></div>
+                </div>
+
+                <div class="pt-1 flex justify-between items-center">
+                  <span class="text-[11px] font-bold text-stone-500">Roll: ${s.roll_number}</span>
+                  <button onclick="sendWhatsAppReminder('${s.id}')" class="ink-btn bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Mom
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+          ${list.length === 0 ? '<p class="col-span-full text-center py-8 text-xs text-stone-500">No matching students found.</p>' : ''}
+        </div>
+      `;
+    }
+
+    // --- VIEW 3: DAILY ATTENDANCE TRACKER ---
+    function renderAttendanceView(container, list) {
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      container.innerHTML = `
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm sm:text-base font-bold font-serif-title text-stone-950">Daily Turnout (${todayStr})</h2>
+          <button onclick="markAllPresent()" class="ink-btn text-[11px] sm:text-xs font-bold text-stone-950 bg-amber-400 hover:bg-amber-300 px-3 py-1.5 rounded-lg">
+            Mark All Present
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+          ${list.map(s => {
+            const todayRecord = (s.attendance_records || []).find(a => a.date === todayStr);
+            const currentStatus = todayRecord ? todayRecord.status : 'unrecorded';
+
+            return `
+              <div class="ink-card p-3 bg-white flex items-center justify-between">
+                <div>
+                  <h4 class="text-xs sm:text-sm font-bold text-stone-900">${s.full_name}</h4>
+                  <p class="text-[11px] text-stone-600">${s.grade_level} &bull; Roll: ${s.roll_number}</p>
+                  <p class="text-[10px] text-stone-500">Status: <strong class="uppercase ${currentStatus === 'present' ? 'text-emerald-700' : (currentStatus === 'absent' ? 'text-rose-700' : 'text-amber-700')}">${currentStatus}</strong></p>
+                </div>
+
+                <div class="flex items-center gap-1.5 bg-[#F6F2E5] p-1.5 rounded-xl border border-stone-300">
+                  <button onclick="setStudentAttendance('${s.id}', 'present')" 
+                          class="w-8 h-8 rounded-lg text-xs font-black transition-colors ${currentStatus === 'present' ? 'bg-emerald-700 text-white shadow' : 'text-stone-700 hover:bg-stone-200'}">
+                    P
+                  </button>
+                  <button onclick="setStudentAttendance('${s.id}', 'absent')" 
+                          class="w-8 h-8 rounded-lg text-xs font-black transition-colors ${currentStatus === 'absent' ? 'bg-rose-700 text-white shadow' : 'text-stone-700 hover:bg-stone-200'}">
+                    A
+                  </button>
+                  <button onclick="setStudentAttendance('${s.id}', 'late')" 
+                          class="w-8 h-8 rounded-lg text-xs font-black transition-colors ${currentStatus === 'late' ? 'bg-amber-600 text-white shadow' : 'text-stone-700 hover:bg-stone-200'}">
+                    L
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+          ${list.length === 0 ? '<p class="col-span-full text-center py-6 text-xs text-stone-500">No students enrolled in this batch.</p>' : ''}
+        </div>
+      `;
+    }
+
+    // --- VIEW 4: STUDENT DIRECTORY ---
+    function renderStudentsView(container, list) {
+      container.innerHTML = `
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm sm:text-base font-bold font-serif-title text-stone-950">Student Roster (${list.length})</h2>
+          <button onclick="openStudentModal()" class="ink-btn bg-amber-400 hover:bg-amber-300 text-stone-950 text-xs font-bold px-3 py-1.5 rounded-xl">
+            + Enroll New
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
+          ${list.map(s => `
+            <div class="ink-card p-3.5 bg-white space-y-2 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-stone-900 text-amber-300 flex items-center justify-center font-bold text-sm">
+                    ${s.full_name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 class="text-xs sm:text-sm font-bold text-stone-900">${s.full_name}</h3>
+                    <p class="text-[11px] text-stone-600">${s.grade_level} &bull; Roll: ${s.roll_number}</p>
+                  </div>
+                </div>
+                <div class="mt-2 text-xs text-stone-600 space-y-0.5">
+                  <p>Guardian: <strong>${s.guardian_name}</strong></p>
+                  <p>WhatsApp: +91 ${s.guardian_phone}</p>
+                  <p class="font-bold text-stone-800 pt-1">Fee Agreed: ${formatINR(s.total_agreed_fee)} (Paid: ${formatINR(s.total_paid)})</p>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-stone-200 flex items-center justify-between">
+                <button onclick="downloadPdfReceipt('${s.id}')" class="text-xs text-indigo-950 font-bold hover:underline">
+                  <i class="fa-solid fa-file-pdf text-rose-600 mr-1"></i> Receipt
+                </button>
+                <button onclick="deleteStudent('${s.id}')" class="text-xs text-rose-700 font-bold hover:underline">
+                  <i class="fa-solid fa-trash-can mr-1"></i> Delete
+                </button>
+              </div>
+            </div>
+          `).join('')}
+          ${list.length === 0 ? '<p class="col-span-full text-center py-6 text-xs text-stone-500">No students found matching your query.</p>' : ''}
+        </div>
+      `;
+    }
+
+    // --- STUDENT ENROLLMENT & ACTIONS ---
+    function openStudentModal() {
+      document.getElementById('studentForm').reset();
+      if (selectedClass !== 'all') {
+        document.getElementById('formClass').value = selectedClass;
+      }
+      document.getElementById('studentModal').classList.remove('hidden');
+    }
+
+    function closeStudentModal() {
+      document.getElementById('studentModal').classList.add('hidden');
+    }
+
+    async function handleSaveStudent(e) {
+      e.preventDefault();
+      const fullName = document.getElementById('formName').value.trim();
+      const gradeLevel = document.getElementById('formClass').value;
+      const rollNumber = document.getElementById('formRoll').value.trim();
+      const guardianName = document.getElementById('formGuardianName').value.trim();
+      const guardianPhone = document.getElementById('formPhone').value.trim();
+      const totalAgreedFee = Number(document.getElementById('formTotalFee').value) || 0;
+      const initialPayment = Number(document.getElementById('formInitialPayment').value) || 0;
+
+      if (!/^[6-9]\d{9}$/.test(guardianPhone)) {
+        showToast("Enter a valid 10-digit Indian phone number.", true);
+        return;
+      }
+
+      if (initialPayment > totalAgreedFee) {
+        showToast("Initial payment cannot exceed total fee.", true);
+        return;
+      }
+
+      const newStudent = {
+        id: 'std-' + Date.now(),
+        institute_id: currentMembership.institute_id,
+        full_name: fullName,
+        grade_level: gradeLevel,
+        roll_number: rollNumber,
+        guardian_name: guardianName,
+        guardian_phone: guardianPhone,
+        total_agreed_fee: totalAgreedFee,
+        total_paid: initialPayment,
+        balance_due: Math.max(0, totalAgreedFee - initialPayment),
+        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'present' }]
+      };
+
+      studentsCache.unshift(newStudent);
+
+      // Cloud synchronization if database active
+      if (supabase) {
+        try {
+          const { data, error } = await supabase.from('students').insert([{
+            institute_id: currentMembership.institute_id,
+            full_name: fullName,
+            grade_level: gradeLevel,
+            roll_number: rollNumber,
+            guardian_name: guardianName,
+            guardian_phone: guardianPhone,
+            total_agreed_fee: totalAgreedFee
+          }]).select().single();
+
+          if (data) {
+            newStudent.id = data.id;
+            await supabase.from('guardian_consents').insert([{
+              institute_id: currentMembership.institute_id,
+              student_id: data.id,
+              guardian_name: guardianName
+            }]);
+
+            if (initialPayment > 0) {
+              await supabase.from('fee_transactions').insert([{
+                institute_id: currentMembership.institute_id,
+                student_id: data.id,
+                amount_paid: initialPayment,
+                payment_mode: 'UPI',
+                receipt_number: 'REC-' + Date.now().toString().slice(-6)
+              }]);
+            }
+          }
+        } catch (err) {
+          console.warn("DB save sync:", err.message);
+        }
+      }
+
+      closeStudentModal();
+      renderActiveView();
+      showToast(`Enrolled ${fullName} successfully!`);
+    }
+
+    // --- FEE PAYMENT & RECEIPT ---
+    function openFeeModal(id) {
+      const s = studentsCache.find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('feeStudentId').value = s.id;
+      document.getElementById('feeStudentName').textContent = `${s.full_name} (${s.grade_level})`;
+      document.getElementById('feeRemainingDisplay').textContent = formatINR(s.balance_due);
+      document.getElementById('feeAmount').value = s.balance_due > 0 ? s.balance_due : '';
+      document.getElementById('feeModal').classList.remove('hidden');
+    }
+
+    function closeFeeModal() {
+      document.getElementById('feeModal').classList.add('hidden');
+    }
+
+    async function handleRecordFee(e) {
+      e.preventDefault();
+      const studentId = document.getElementById('feeStudentId').value;
+      const amount = Number(document.getElementById('feeAmount').value) || 0;
+      const mode = document.getElementById('feeMode').value;
+      const s = studentsCache.find(x => x.id === studentId);
+
+      if (!s || amount <= 0) return;
+
+      if (amount > s.balance_due) {
+        showToast(`Amount exceeds outstanding due (${formatINR(s.balance_due)})`, true);
+        return;
+      }
+
+      s.total_paid += amount;
+      s.balance_due = Math.max(0, s.total_agreed_fee - s.total_paid);
+
+      const receiptNo = 'REC-' + Math.floor(100000 + Math.random() * 900000);
+
+      if (supabase) {
+        try {
+          await supabase.from('fee_transactions').insert([{
+            institute_id: currentMembership.institute_id,
+            student_id: s.id,
+            amount_paid: amount,
+            payment_mode: mode,
+            receipt_number: receiptNo
+          }]);
+        } catch (err) {
+          console.warn("Fee commit sync:", err.message);
+        }
+      }
+
+      closeFeeModal();
+      renderActiveView();
+      showToast(`Received payment of ${formatINR(amount)}!`);
+      setTimeout(() => downloadPdfReceipt(s.id), 300);
+    }
+
+    // --- ATTENDANCE MARKERS ---
+    function setStudentAttendance(id, status) {
+      const s = studentsCache.find(x => x.id === id);
+      if (!s) return;
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      if (!s.attendance_records) s.attendance_records = [];
+      const existing = s.attendance_records.find(a => a.date === todayStr);
+      if (existing) {
+        existing.status = status;
+      } else {
+        s.attendance_records.push({ date: todayStr, status });
+      }
+
+      if (supabase) {
+        supabase.from('attendance_records').upsert({
+          institute_id: currentMembership.institute_id,
+          student_id: s.id,
+          date: todayStr,
+          status: status
+        }, { onConflict: 'student_id,date' }).then(() => {});
+      }
+
+      renderActiveView();
+      showToast(`Marked ${s.full_name} ${status.toUpperCase()}`);
+    }
+
+    function markAllPresent() {
+      const list = getFilteredList();
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      list.forEach(s => {
+        if (!s.attendance_records) s.attendance_records = [];
+        const existing = s.attendance_records.find(a => a.date === todayStr);
+        if (existing) existing.status = 'present';
+        else s.attendance_records.push({ date: todayStr, status: 'present' });
+      });
+
+      renderActiveView();
+      showToast(`Marked all ${list.length} students Present`);
+    }
+
+    // --- DELETE RECORD ---
+    async function deleteStudent(id) {
+      const s = studentsCache.find(x => x.id === id);
+      if (!s) return;
+
+      if (!confirm(`Are you sure you want to remove records for ${s.full_name}?`)) return;
+
+      studentsCache = studentsCache.filter(x => x.id !== id);
+
+      if (supabase) {
+        try {
+          await supabase.from('students').delete().eq('id', id);
+        } catch(e) {}
+      }
+
+      renderActiveView();
+      showToast(`Removed student ${s.full_name}.`);
+    }
+
+    // --- WHATSAPP NOTIFICATIONS ---
+    function sendWhatsAppReminder(id) {
+      const s = studentsCache.find(x => x.id === id);
+      if (!s || !s.guardian_phone) {
+        showToast("Valid guardian phone missing.", true);
+        return;
+      }
+
+      const msg = 
+`Notice from ${currentMembership.institute_name}
+Date: ${new Date().toLocaleDateString('en-IN')}
+
+Dear Mother (${s.guardian_name}),
+Educational & tuition update for ${s.full_name} (${s.grade_level}):
+• Total Course Fee: INR ${s.total_agreed_fee.toLocaleString('en-IN')}
+• Fees Credited: INR ${s.total_paid.toLocaleString('en-IN')}
+• Outstanding Balance: INR ${s.balance_due.toLocaleString('en-IN')}
+
+Kindly clear the balance at your earliest convenience.
+Academic Desk: +91 22 2756 0000`;
+
+      window.open(`https://wa.me/91${s.guardian_phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+    }
+
+    // --- JSPDF OFFICIAL RECEIPT DOWNLOAD ---
+    function downloadPdfReceipt(id) {
+      const s = studentsCache.find(x => x.id === id);
+      if (!s || !window.jspdf) {
+        showToast("PDF generator initializing...", true);
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'a5' });
+
+      // Header Banner
+      doc.setFillColor(28, 25, 20);
+      doc.rect(0, 0, 420, 52, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(246, 242, 229);
+      doc.setFontSize(14);
+      doc.text(currentMembership.institute_name, 20, 26);
+      doc.setFontSize(8);
+      doc.text("Official Tuition Statement & Payment Receipt", 20, 42);
+
+      // Student Meta
+      doc.setTextColor(31, 27, 20);
+      doc.setFontSize(10);
+      doc.text(`Student: ${s.full_name} (${s.grade_level})`, 20, 80);
+      doc.text(`Guardian: ${s.guardian_name} | Mobile: +91 ${s.guardian_phone}`, 20, 96);
+      doc.text(`Roll Number: ${s.roll_number}`, 20, 112);
+      doc.text(`Date of Issue: ${new Date().toLocaleDateString('en-IN')}`, 20, 128);
+
+      doc.setDrawColor(28, 25, 20);
+      doc.line(20, 142, 400, 142);
+
+      // Fee Breakdown
+      doc.text(`Total Agreed Tuition: Rs. ${s.total_agreed_fee.toLocaleString('en-IN')}`, 20, 168);
+      doc.setTextColor(16, 122, 70);
+      doc.text(`Total Amount Verified & Paid: Rs. ${s.total_paid.toLocaleString('en-IN')}`, 20, 188);
+      doc.setTextColor(190, 18, 60);
+      doc.text(`Current Outstanding Balance: Rs. ${s.balance_due.toLocaleString('en-IN')}`, 20, 208);
+
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(120, 120, 120);
+      doc.text("Generated securely by Apex Academy Management Cloud.", 20, 250);
+
+      doc.save(`FeeReceipt_${s.roll_number}.pdf`);
+      showToast("PDF Receipt downloaded!");
+    }
+  </script>
+</body>
+</html>
