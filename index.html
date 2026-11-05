@@ -2,442 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>Apex Academy | Coaching Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Apex Academy | Management Portal</title>
   
-  <!-- Premium Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Goudy+Bookletter+1911&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sorts+Mill+Goudy&display=swap" rel="stylesheet">
-
-  <!-- Core CDNs -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Supabase JS Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+  <!-- jsPDF & AutoTable for Reports & Receipts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Chart.js for Performance Trends -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    :root {
-      --paper: #F6F2E5;
-      --paper-card: #FFFFFF;
-      --paper-tint: #EFE9D7;
-      --ink: #1F1B14;
-      --line: #1C1914;
-      --accent: #2E266D;
-      --accent-gold: #D69E2E;
-    }
-    
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: #171512;
-      color: var(--ink);
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .font-serif-title { font-family: 'Goudy Bookletter 1911', Georgia, serif; }
-    .font-serif-eyebrow { font-family: 'Sorts Mill Goudy', Georgia, serif; }
-
-    .ink-btn {
-      border: 2px solid var(--line);
-      box-shadow: 0 3px 0 var(--line);
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
-      cursor: pointer;
-    }
-    .ink-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 1px 0 var(--line);
-    }
-
-    .ink-card {
-      background: var(--paper-card);
-      border: 2px solid var(--line);
-      box-shadow: 0 3px 0 var(--line);
-      border-radius: 16px;
-    }
-
-    .tab-active {
-      background-color: #1C1914 !important;
-      color: #F6F2E5 !important;
-    }
-    .tab-inactive {
-      background-color: #E7E5E4 !important;
-      color: #44403C !important;
-    }
-
-    .meter-fill {
-      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
+    :root { --paper: #F8F9FA; --ink: #111827; --brand: #D97706; --panel: #FFFFFF; }
+    body { background-color: #0F172A; color: var(--ink); font-family: ui-sans-serif, system-ui, sans-serif; }
+    .ink-card { background: var(--panel); border: 2px solid #1E293B; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .ink-btn { border: 2px solid #0F172A; transition: all 0.15s ease-in-out; }
+    .ink-btn:active { transform: scale(0.98); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 lg:p-6">
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4">
 
-  <!-- Toast Notification Banner -->
-  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none max-w-sm w-full px-4">
-    <div class="bg-stone-900 text-stone-100 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-semibold border-2 border-stone-700">
-      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-      <span id="toastMsg" class="flex-1">Notification</span>
+  <!-- Offline Banner -->
+  <div id="offlineBanner" class="hidden fixed top-0 left-0 w-full bg-rose-600 text-white text-xs font-bold py-2 px-4 text-center z-50 flex items-center justify-center gap-2 shadow-lg">
+    <i class="fa-solid fa-wifi"></i>
+    <span>Internet disconnect ho gaya hai. Aap offline hain.</span>
+    <button onclick="window.location.reload()" class="bg-white text-rose-700 px-2 py-0.5 rounded text-[11px] font-black uppercase">Retry</button>
+  </div>
+
+  <!-- Dynamic Toast Notification -->
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-20 opacity-0 pointer-events-none max-w-sm w-full px-4">
+    <div id="toastInner" class="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-semibold border-2 border-slate-700">
+      <i id="toastIcon" class="fa-solid fa-circle-info text-amber-400"></i>
+      <span id="toastMsg" class="flex-1"></span>
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- 1. AUTH SCREEN: LOGIN / SIGNUP WITH DEMO PRE-FILL                         -->
-  <!-- ========================================================================= -->
-  <div id="authContainer" class="w-full max-w-md my-auto p-6 ink-card bg-[#F6F2E5] border-4 border-stone-900 shadow-2xl m-2">
-    <div class="text-center space-y-1.5 mb-5">
-      <div class="w-14 h-14 rounded-2xl bg-stone-900 text-amber-300 flex items-center justify-center mx-auto border-2 border-stone-900 shadow">
+  <!-- AUTHENTICATION FORM -->
+  <div id="authScreen" class="w-full max-w-md my-auto p-6 ink-card bg-amber-50 border-4 border-slate-900 shadow-2xl">
+    <div class="text-center space-y-1 mb-6">
+      <div class="w-14 h-14 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center mx-auto border-2 border-slate-900 shadow">
         <i class="fa-solid fa-graduation-cap text-2xl"></i>
       </div>
-      <h1 class="text-2xl font-bold font-serif-title text-stone-950">Apex Academy</h1>
-      <p class="text-xs text-stone-600">Coaching Institute Management &bull; Multi-Tenant Portal</p>
+      <h1 class="text-2xl font-black text-slate-950 tracking-tight">Apex Academy</h1>
+      <p class="text-xs text-slate-600 font-semibold">Institute Administration Portal</p>
     </div>
 
-    <!-- Toggle Buttons -->
-    <div class="flex border-2 border-stone-900 rounded-xl mb-4 overflow-hidden bg-stone-200 p-1 gap-1">
-      <button id="authTabLogin" type="button" onclick="switchAuthTab('login')" class="tab-active flex-1 py-2 text-xs font-bold rounded-lg text-center transition-colors">
-        Sign In
-      </button>
-      <button id="authTabRegister" type="button" onclick="switchAuthTab('register')" class="tab-inactive flex-1 py-2 text-xs font-bold rounded-lg text-center transition-colors">
-        Register Institute
-      </button>
+    <div class="flex border-2 border-slate-900 rounded-xl mb-4 overflow-hidden bg-slate-200 p-1 gap-1">
+      <button id="authTabLogin" onclick="switchAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-lg text-center bg-slate-900 text-white">Sign In</button>
+      <button id="authTabRegister" onclick="switchAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-lg text-center text-slate-700">Register Institute</button>
     </div>
 
-    <!-- Login Form -->
-    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3.5 text-xs block">
+    <!-- Login -->
+    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-xs block">
       <div>
-        <label class="block font-bold text-stone-800 mb-1">Email Address</label>
-        <input type="email" id="loginEmail" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium focus:outline-none" placeholder="director@apex.com">
+        <label class="block font-bold text-slate-800 mb-1">Email Address</label>
+        <input type="email" id="loginEmail" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="admin@apex.com">
       </div>
       <div>
-        <label class="block font-bold text-stone-800 mb-1">Password</label>
-        <input type="password" id="loginPassword" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium focus:outline-none" placeholder="••••••••">
+        <label class="block font-bold text-slate-800 mb-1">Password</label>
+        <input type="password" id="loginPassword" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="••••••••">
       </div>
-      <button type="submit" class="w-full ink-btn py-3 bg-[#1C1914] text-amber-300 font-bold rounded-xl flex items-center justify-center gap-2">
+      <button type="submit" id="loginSubmitBtn" class="w-full ink-btn py-3 bg-slate-900 text-amber-300 font-bold rounded-xl flex items-center justify-center gap-2">
         <i class="fa-solid fa-lock text-xs"></i> Enter Workspace
       </button>
     </form>
 
-    <!-- Register Form -->
-    <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3 text-xs hidden">
+    <!-- Register -->
+    <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3.5 text-xs hidden">
       <div>
-        <label class="block font-bold text-stone-800 mb-1">Coaching Institute Name</label>
-        <input type="text" id="regInstituteName" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium" placeholder="Apex IIT-JEE Classes">
+        <label class="block font-bold text-slate-800 mb-1">Institute Name</label>
+        <input type="text" id="regInstituteName" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="Apex IIT-JEE Coaching">
       </div>
       <div>
-        <label class="block font-bold text-stone-800 mb-1">Owner Email</label>
-        <input type="email" id="regEmail" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium" placeholder="director@apex.com">
+        <label class="block font-bold text-slate-800 mb-1">Director Email</label>
+        <input type="email" id="regEmail" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="director@apex.com">
       </div>
       <div>
-        <label class="block font-bold text-stone-800 mb-1">Password (Min 8 chars, 1 num, 1 sym)</label>
-        <input type="password" id="regPassword" required minlength="8" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium" placeholder="••••••••">
+        <label class="block font-bold text-slate-800 mb-1">Password (Min 8 chars)</label>
+        <input type="password" id="regPassword" required minlength="8" class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="••••••••">
       </div>
-      <button type="submit" class="w-full ink-btn py-3 bg-[#1C1914] text-emerald-400 font-bold rounded-xl flex items-center justify-center gap-2">
-        <i class="fa-solid fa-building-circle-check text-xs"></i> Create Institute & Account
+      <button type="submit" id="regSubmitBtn" class="w-full ink-btn py-3 bg-slate-900 text-emerald-400 font-bold rounded-xl flex items-center justify-center gap-2">
+        <i class="fa-solid fa-building-circle-check"></i> Register Institute
       </button>
     </form>
-
-    <!-- Instant Sandbox Preview Bypass -->
-    <div class="mt-5 pt-3 border-t-2 border-stone-300 text-center">
-      <button type="button" onclick="loadSandboxMode()" class="w-full ink-btn py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5">
-        <i class="fa-solid fa-bolt text-amber-600"></i> Explore Live Preview Mode (Instant Demo)
-      </button>
-      <p class="text-[10px] text-stone-500 mt-1.5">Use your Supabase login or test in live preview mode.</p>
-    </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- 2. MAIN APPLICATION WORKSPACE                                             -->
-  <!-- ========================================================================= -->
-  <div id="mainAppShell" class="w-full max-w-6xl min-h-[92vh] bg-[#F6F2E5] border-4 border-stone-900 rounded-3xl flex-col hidden shadow-2xl my-2 overflow-hidden">
+  <!-- MAIN DASHBOARD SHELL -->
+  <div id="mainApp" class="w-full max-w-6xl min-h-[92vh] bg-slate-50 border-4 border-slate-900 rounded-3xl flex-col hidden shadow-2xl my-2 overflow-hidden">
     
-    <!-- Header Bar -->
-    <header class="bg-[#1C1914] text-[#F6F2E5] px-4 sm:px-6 py-3.5 border-b-2 border-black flex-shrink-0 z-20">
+    <!-- Header -->
+    <header class="bg-slate-900 text-slate-100 px-4 py-3 border-b-2 border-black flex flex-col gap-2">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-400/20 border-2 border-amber-400/60 flex items-center justify-center text-amber-300">
-            <i class="fa-solid fa-graduation-cap text-lg"></i>
+          <div class="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black">
+            <i class="fa-solid fa-atom"></i>
           </div>
           <div>
-            <h1 class="text-sm sm:text-base font-bold font-serif-title flex items-center gap-2 leading-none">
-              <span id="displayInstituteName">Apex Academy</span>
-              <span id="userRoleBadge" class="text-[9px] bg-amber-400 text-stone-950 font-black px-1.5 py-0.5 rounded uppercase">Owner</span>
-            </h1>
-            <p id="displayUserEmail" class="text-[11px] text-stone-400 mt-1 font-mono">director@apex.com</p>
+            <h2 id="headerInstituteName" class="text-sm font-black text-amber-300">Apex Academy</h2>
+            <p id="headerUserEmail" class="text-[10px] text-slate-400 font-mono"></p>
           </div>
         </div>
-
         <div class="flex items-center gap-2">
-          <button type="button" onclick="openStudentModal()" class="ink-btn bg-amber-400 hover:bg-amber-300 text-stone-950 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-            <i class="fa-solid fa-user-plus text-[11px]"></i> Add Student
+          <button onclick="refreshData(true)" title="Fetch Latest Data" class="ink-btn bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl flex items-center gap-1">
+            <i id="refreshIcon" class="fa-solid fa-rotate text-xs"></i>
+            <span class="hidden sm:inline">Refresh</span>
           </button>
-          <button type="button" onclick="handleSignOut()" class="ink-btn bg-rose-900 text-white hover:bg-rose-800 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            <span class="hidden sm:inline">Logout</span>
+          <button onclick="handleSignOut()" class="ink-btn bg-rose-700 text-white text-xs px-3 py-1.5 rounded-xl font-bold">
+            <i class="fa-solid fa-power-off"></i>
           </button>
         </div>
       </div>
 
-      <!-- Search & Filters -->
-      <div class="mt-3 flex flex-col md:flex-row md:items-center gap-2.5">
-        <div class="relative flex-1">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-stone-400"></i>
-          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search student name, roll number, or mother's phone..."
-                 class="w-full bg-stone-800/90 text-stone-100 placeholder-stone-400 text-xs pl-8 pr-3 py-2 rounded-xl border border-stone-700 focus:outline-none focus:border-amber-400">
-        </div>
-        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          <button type="button" onclick="filterByClass('all')" id="btn-cls-all" class="class-filter-btn px-3 py-1 text-[11px] font-bold rounded-lg bg-amber-400 text-stone-950 border border-stone-900 whitespace-nowrap ink-btn">All Classes</button>
-          <button type="button" onclick="filterByClass('Class 9th')" id="btn-cls-9" class="class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap">Class 9th</button>
-          <button type="button" onclick="filterByClass('Class 10th')" id="btn-cls-10" class="class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap">Class 10th</button>
-          <button type="button" onclick="filterByClass('Class 11th')" id="btn-cls-11" class="class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap">Class 11th</button>
-          <button type="button" onclick="filterByClass('Class 12th')" id="btn-cls-12" class="class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap">Class 12th</button>
-        </div>
-      </div>
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-slate-800 text-xs">
+        <button onclick="setTab('dashboard')" id="nav-dashboard" class="px-3 py-1.5 font-bold rounded-xl bg-amber-400 text-slate-950">Dashboard</button>
+        <button onclick="setTab('batches')" id="nav-batches" class="px-3 py-1.5 font-semibold text-slate-300">Batches</button>
+        <button onclick="setTab('students')" id="nav-students" class="px-3 py-1.5 font-semibold text-slate-300">Students</button>
+        <button onclick="setTab('attendance')" id="nav-attendance" class="px-3 py-1.5 font-semibold text-slate-300">Attendance</button>
+        <button onclick="setTab('fees')" id="nav-fees" class="px-3 py-1.5 font-semibold text-slate-300">Fees</button>
+        <button onclick="setTab('tests')" id="nav-tests" class="px-3 py-1.5 font-semibold text-slate-300">Tests</button>
+        <button onclick="setTab('enquiries')" id="nav-enquiries" class="px-3 py-1.5 font-semibold text-slate-300">Enquiries</button>
+      </nav>
     </header>
 
-    <!-- Sub-header Ribbon -->
-    <div class="bg-[#EFE9D7] border-b-2 border-stone-900/15 px-4 sm:px-6 py-2 flex items-center justify-between text-xs text-stone-800">
-      <span class="font-medium">Selected Batch: <strong id="activeBatchText" class="font-bold">All Classes</strong></span>
-      <span class="text-[11px] font-bold text-stone-800 bg-stone-200 px-2.5 py-0.5 rounded-full border border-stone-300" id="rosterCountBadge">0 Students</span>
-    </div>
-
-    <!-- Main Dynamic Content Workspace -->
-    <main id="mainContainer" class="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-6 space-y-4 pb-24">
-      <!-- Injected Dynamically -->
-    </main>
-
-    <!-- Bottom Navigation Bar -->
-    <nav class="sticky bottom-0 left-0 right-0 bg-[#1C1914] border-t-2 border-black px-4 py-2.5 flex justify-around items-center z-20">
-      <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center gap-0.5 text-amber-400 p-1">
-        <i class="fa-solid fa-chart-pie text-base"></i>
-        <span class="text-[10px] sm:text-xs font-bold">Dashboard</span>
-      </button>
-      <button type="button" onclick="switchTab('fees')" id="nav-fees" class="flex flex-col items-center gap-0.5 text-stone-400 p-1">
-        <i class="fa-solid fa-wallet text-base"></i>
-        <span class="text-[10px] sm:text-xs font-bold">Fees</span>
-      </button>
-      <button type="button" onclick="switchTab('attendance')" id="nav-attendance" class="flex flex-col items-center gap-0.5 text-stone-400 p-1">
-        <i class="fa-solid fa-calendar-check text-base"></i>
-        <span class="text-[10px] sm:text-xs font-bold">Attendance</span>
-      </button>
-      <button type="button" onclick="switchTab('students')" id="nav-students" class="flex flex-col items-center gap-0.5 text-stone-400 p-1">
-        <i class="fa-solid fa-users text-base"></i>
-        <span class="text-[10px] sm:text-xs font-bold">Students</span>
-      </button>
-    </nav>
+    <!-- Main Dynamic Content Container -->
+    <main id="appBody" class="flex-1 p-3 sm:p-5 overflow-y-auto space-y-4"></main>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- 3. MODALS (STUDENT ENROLLMENT, FEE PAYMENT, PRIVACY NOTICE)                -->
-  <!-- ========================================================================= -->
-
-  <!-- Modal: Add Student & Statutory Consent -->
-  <div id="studentModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
-    <div class="bg-[#F6F2E5] w-full max-w-lg rounded-2xl max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border-4 border-stone-900 space-y-3">
-      <div class="flex items-center justify-between pb-2 border-b-2 border-stone-900">
-        <h3 class="text-base font-bold font-serif-title text-stone-950">Enroll Minor & Record Consent</h3>
-        <button type="button" onclick="closeStudentModal()" class="text-stone-700 text-base hover:text-black"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <form id="studentForm" onsubmit="handleSaveStudent(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-stone-800 mb-1">Student Full Name * (Class 9-12)</label>
-          <input type="text" id="formName" required maxlength="100" placeholder="e.g. Aryan Sharma" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
-        </div>
-        <div class="grid grid-cols-2 gap-2.5">
-          <div>
-            <label class="block font-bold text-stone-800 mb-1">Grade Level *</label>
-            <select id="formClass" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
-              <option value="Class 9th">Class 9th</option>
-              <option value="Class 10th">Class 10th</option>
-              <option value="Class 11th">Class 11th</option>
-              <option value="Class 12th">Class 12th</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-stone-800 mb-1">Roll / ID Number *</label>
-            <input type="text" id="formRoll" required maxlength="20" placeholder="APX-101" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2.5">
-          <div>
-            <label class="block font-bold text-stone-800 mb-1">Guardian / Mother Name *</label>
-            <input type="text" id="formGuardianName" required maxlength="100" placeholder="Sunita Sharma" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
-          </div>
-          <div>
-            <label class="block font-bold text-stone-800 mb-1">Mother WhatsApp (10-Digit) *</label>
-            <input type="tel" id="formPhone" required pattern="^[6-9]\d{9}$" maxlength="10" placeholder="9876543210" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-medium">
-          </div>
-        </div>
-
-        <div class="ink-card p-3 bg-amber-50 border-stone-900 space-y-2">
-          <span class="text-[11px] font-bold text-stone-900 uppercase">Fee Agreement</span>
-          <div class="grid grid-cols-2 gap-2.5">
-            <div>
-              <label class="block text-[11px] font-semibold text-stone-700">Total Agreed Fee (₹) *</label>
-              <input type="number" id="formTotalFee" required min="0" max="1000000" placeholder="30000" class="w-full p-2 rounded-lg border-2 border-stone-900 bg-white font-bold">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-stone-700">Initial Payment (₹)</label>
-              <input type="number" id="formInitialPayment" min="0" value="0" class="w-full p-2 rounded-lg border-2 border-stone-900 bg-white font-bold">
-            </div>
-          </div>
-        </div>
-
-        <div class="p-3 bg-white rounded-xl border-2 border-stone-900 space-y-2">
-          <div class="flex items-center gap-2">
-            <input type="checkbox" id="formConsentCheck" required checked class="w-4 h-4 accent-stone-900">
-            <label for="formConsentCheck" class="text-[11px] font-bold text-stone-900 leading-tight">
-              Statutory Guardian Consent Confirmed (DPDP Act)
-            </label>
-          </div>
-          <p class="text-[10px] text-stone-600 leading-normal pl-6">
-            The legal guardian has reviewed the Privacy Policy and provided consent to record attendance, performance, and receive fee notices.
-          </p>
-        </div>
-
-        <div class="pt-2 flex gap-2">
-          <button type="button" onclick="closeStudentModal()" class="ink-btn w-1/2 py-2.5 font-bold text-stone-800 bg-stone-200 rounded-xl">Cancel</button>
-          <button type="submit" class="ink-btn w-1/2 py-2.5 font-bold text-white bg-stone-900 rounded-xl">Save to Ledger</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal: Pay Fee & Generate Receipt -->
-  <div id="feeModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
-    <div class="bg-[#F6F2E5] w-full max-w-sm rounded-2xl p-4 sm:p-5 shadow-2xl border-4 border-stone-900 space-y-3">
-      <div class="flex items-center justify-between pb-2 border-b-2 border-stone-900">
-        <h3 class="text-sm font-bold font-serif-title text-stone-950">Record Fee Collection</h3>
-        <button type="button" onclick="closeFeeModal()" class="text-stone-700"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <form id="feeForm" onsubmit="handleRecordFee(event)" class="space-y-3 text-xs">
-        <input type="hidden" id="feeStudentId">
-        <div class="ink-card p-3 bg-white">
-          <p class="font-bold text-stone-900" id="feeStudentName">Student</p>
-          <p class="text-xs font-semibold text-rose-700 mt-0.5">Remaining Due: <span id="feeRemainingDisplay">₹0</span></p>
-        </div>
-
-        <div>
-          <label class="block font-bold text-stone-800 mb-1">Receiving Amount (₹) *</label>
-          <input type="number" id="feeAmount" required min="1" class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-bold">
-        </div>
-
-        <div>
-          <label class="block font-bold text-stone-800 mb-1">Payment Mode *</label>
-          <select id="feeMode" required class="w-full p-2.5 rounded-xl border-2 border-stone-900 bg-white font-semibold">
-            <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
-            <option value="Cash">Cash in Hand</option>
-            <option value="Bank Transfer">Bank Transfer / NEFT</option>
-          </select>
-        </div>
-
-        <div class="pt-1 flex gap-2">
-          <button type="button" onclick="closeFeeModal()" class="ink-btn w-1/2 py-2.5 font-bold bg-stone-200 rounded-xl">Cancel</button>
-          <button type="submit" class="ink-btn w-1/2 py-2.5 font-bold text-white bg-emerald-800 rounded-xl">Commit & PDF</button>
-        </div>
-      </form>
-    </div>
+  <!-- MODAL CONTAINER (FOR POPUPS) -->
+  <div id="modalOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div id="modalBox" class="bg-white w-full max-w-lg rounded-2xl p-5 border-4 border-slate-900 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"></div>
   </div>
 
   <script>
-    // =========================================================================
-    // APEX ACADEMY CLIENT CORE (WORKS WITH LIVE SUPABASE OR PREVIEW MODE)
-    // =========================================================================
+    // CONFIGURATION & GLOBAL STATE
     const SUPABASE_CONFIG = {
       url: "https://tscsxhzwfregixatskqp.supabase.co",
       anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3N4aHp3ZnJlZ2l4YXRza3FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTU5ODMsImV4cCI6MjEwODk3MTk4M30.qxv-azvjt8OOuGGBPId6qMVe3lkr_kyHBiinYQKvU6c"
     };
 
-    let supabase = null;
-    let currentMembership = { institute_id: 'demo-inst-1', role: 'owner', institute_name: 'Apex Academy (Live Preview)' };
-    let studentsCache = [];
-    let currentTab = 'dashboard';
-    let selectedClass = 'all';
-    let searchQuery = '';
+    let client = null;
+    let currentUser = null;
+    let currentInstitute = null;
+    let currentRole = 'admin';
+    let activeTab = 'dashboard';
 
-    // Initial Mock Roster for immediate interactive Preview
-    const INITIAL_PREVIEW_ROSTER = [
-      {
-        id: "std-001",
-        institute_id: "demo-inst-1",
-        full_name: "Aarav Sharma",
-        grade_level: "Class 10th",
-        roll_number: "APX-101",
-        guardian_name: "Sunita Sharma",
-        guardian_phone: "9820123456",
-        total_agreed_fee: 35000,
-        total_paid: 20000,
-        balance_due: 15000,
-        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'present' }]
-      },
-      {
-        id: "std-002",
-        institute_id: "demo-inst-1",
-        full_name: "Rhea Deshmukh",
-        grade_level: "Class 12th",
-        roll_number: "APX-102",
-        guardian_name: "Kavita Deshmukh",
-        guardian_phone: "9833445566",
-        total_agreed_fee: 45000,
-        total_paid: 45000,
-        balance_due: 0,
-        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'present' }]
-      },
-      {
-        id: "std-003",
-        institute_id: "demo-inst-1",
-        full_name: "Aditya Patil",
-        grade_level: "Class 11th",
-        roll_number: "APX-103",
-        guardian_name: "Pooja Patil",
-        guardian_phone: "9766554433",
-        total_agreed_fee: 40000,
-        total_paid: 15000,
-        balance_due: 25000,
-        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'late' }]
-      },
-      {
-        id: "std-004",
-        institute_id: "demo-inst-1",
-        full_name: "Meera Nair",
-        grade_level: "Class 9th",
-        roll_number: "APX-104",
-        guardian_name: "Anjali Nair",
-        guardian_phone: "9892001122",
-        total_agreed_fee: 28000,
-        total_paid: 28000,
-        balance_due: 0,
-        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'present' }]
+    let state = {
+      batches: [],
+      students: [],
+      attendanceLocks: [],
+      holidays: [],
+      tests: [],
+      testScores: [],
+      payments: [],
+      discounts: [],
+      enquiries: []
+    };
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      window.addEventListener('online', () => {
+        document.getElementById('offlineBanner').classList.add('hidden');
+        refreshData(false);
+      });
+      window.addEventListener('offline', () => {
+        document.getElementById('offlineBanner').classList.remove('hidden');
+      });
+
+      if (typeof window.supabase !== 'undefined') {
+        client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
       }
-    ];
+
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        await initWorkspace(session.user);
+      }
+    });
 
     function showToast(msg, isError = false) {
-      const t = document.getElementById('toast');
-      const icon = document.getElementById('toastIcon');
-      const text = document.getElementById('toastMsg');
-      
-      text.textContent = msg;
-      icon.className = isError 
-        ? 'fa-solid fa-circle-exclamation text-rose-400 text-sm' 
-        : 'fa-solid fa-circle-check text-emerald-400 text-sm';
-
-      t.classList.remove('opacity-0', '-translate-y-24', 'pointer-events-none');
-      t.classList.add('opacity-100', 'translate-y-0');
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+      toastMsg.textContent = msg;
+      toastIcon.className = isError ? 'fa-solid fa-triangle-exclamation text-rose-500' : 'fa-solid fa-circle-check text-emerald-400';
+      toast.classList.remove('opacity-0', '-translate-y-20', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
       setTimeout(() => {
-        t.classList.add('opacity-0', '-translate-y-24', 'pointer-events-none');
-        t.classList.remove('opacity-100', 'translate-y-0');
-      }, 3000);
-    }
-
-    function formatINR(val) {
-      return '₹' + Number(val || 0).toLocaleString('en-IN');
+        toast.classList.add('opacity-0', '-translate-y-20', 'pointer-events-none');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3500);
     }
 
     function switchAuthTab(type) {
@@ -445,71 +202,33 @@
       const regTab = document.getElementById('authTabRegister');
       const loginForm = document.getElementById('loginForm');
       const regForm = document.getElementById('registerForm');
-
       if (type === 'login') {
-        loginTab.className = 'tab-active flex-1 py-2 text-xs font-bold rounded-lg text-center';
-        regTab.className = 'tab-inactive flex-1 py-2 text-xs font-bold rounded-lg text-center';
-        loginForm.classList.remove('hidden');
-        loginForm.classList.add('block');
-        regForm.classList.remove('block');
-        regForm.classList.add('hidden');
+        loginTab.className = 'flex-1 py-2 text-xs font-bold rounded-lg text-center bg-slate-900 text-white';
+        regTab.className = 'flex-1 py-2 text-xs font-bold rounded-lg text-center text-slate-700';
+        loginForm.classList.remove('hidden'); regForm.classList.add('hidden');
       } else {
-        regTab.className = 'tab-active flex-1 py-2 text-xs font-bold rounded-lg text-center';
-        loginTab.className = 'tab-inactive flex-1 py-2 text-xs font-bold rounded-lg text-center';
-        regForm.classList.remove('hidden');
-        regForm.classList.add('block');
-        loginForm.classList.remove('block');
-        loginForm.classList.add('hidden');
+        regTab.className = 'flex-1 py-2 text-xs font-bold rounded-lg text-center bg-slate-900 text-white';
+        loginTab.className = 'flex-1 py-2 text-xs font-bold rounded-lg text-center text-slate-700';
+        regForm.classList.remove('hidden'); loginForm.classList.add('hidden');
       }
-    }
-
-    // --- APPLICATION STARTUP ---
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
-          supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-          
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            await handleAuthenticatedUser(session.user);
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn("Direct cloud link notice:", e.message);
-      }
-    });
-
-    function loadSandboxMode() {
-      studentsCache = [...INITIAL_PREVIEW_ROSTER];
-      document.getElementById('authContainer').classList.add('hidden');
-      document.getElementById('mainAppShell').classList.remove('hidden');
-      document.getElementById('mainAppShell').classList.add('flex');
-      
-      document.getElementById('displayInstituteName').textContent = currentMembership.institute_name;
-      document.getElementById('displayUserEmail').textContent = 'director@apex.com';
-      document.getElementById('userRoleBadge').textContent = 'Owner';
-      
-      showToast("Live Preview Mode initialized!");
-      renderActiveView();
     }
 
     async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginSubmitBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...`;
 
-      if (!supabase) {
-        loadSandboxMode();
-        return;
-      }
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-lock text-xs"></i> Enter Workspace`;
 
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        await handleAuthenticatedUser(data.user);
-      } catch (err) {
-        showToast(err.message || "Failed to authenticate.", true);
+      if (error) {
+        showToast(error.message, true);
+      } else {
+        await initWorkspace(data.user);
       }
     }
 
@@ -518,687 +237,1600 @@
       const instituteName = document.getElementById('regInstituteName').value.trim();
       const email = document.getElementById('regEmail').value.trim();
       const password = document.getElementById('regPassword').value;
+      const btn = document.getElementById('regSubmitBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Provisioning...`;
 
-      if (!supabase) {
-        currentMembership.institute_name = instituteName;
-        loadSandboxMode();
+      const { data, error } = await client.auth.signUp({
+        email,
+        password,
+        options: { data: { initial_institute_name: instituteName } }
+      });
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-building-circle-check"></i> Register Institute`;
+
+      if (error) {
+        showToast(error.message, true);
+      } else {
+        showToast("Institute account ban gaya! Kripya Sign In karein.");
+        switchAuthTab('login');
+      }
+    }
+
+    async function initWorkspace(user) {
+      currentUser = user;
+      const { data: member, error } = await client
+        .from('members')
+        .select('institute_id, role, institutes(name)')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error || !member) {
+        showToast("Institute mapping nahi mili. Kripya check karein.", true);
         return;
       }
 
+      currentInstitute = { id: member.institute_id, name: member.institutes.name };
+      currentRole = member.role;
+
+      document.getElementById('headerInstituteName').textContent = currentInstitute.name;
+      document.getElementById('headerUserEmail').textContent = `${currentUser.email} (${currentRole.toUpperCase()})`;
+
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      document.getElementById('mainApp').classList.add('flex');
+
+      await refreshData(false);
+    }
+
+    async function handleSignOut() {
+      await client.auth.signOut();
+      location.reload();
+    }
+
+    async function refreshData(manual = false) {
+      const icon = document.getElementById('refreshIcon');
+      if (icon) icon.classList.add('fa-spin');
+
       try {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { initial_institute_name: instituteName } }
-        });
-        if (error) throw error;
-        showToast("Registration submitted! Please verify email or sign in.");
-        switchAuthTab('login');
+        const [
+          batchesRes,
+          studentsRes,
+          locksRes,
+          holidaysRes,
+          testsRes,
+          scoresRes,
+          paymentsRes,
+          discountsRes,
+          enquiriesRes
+        ] = await Promise.all([
+          client.from('batches').select('*').order('name'),
+          client.from('students').select('*, student_batches(batch_id)').order('student_name'),
+          client.from('attendance_locks').select('*'),
+          client.from('holidays').select('*').order('holiday_date'),
+          client.from('tests').select('*').order('test_date', { ascending: false }),
+          client.from('test_scores').select('*'),
+          client.from('fee_payments').select('*').order('created_at', { ascending: false }),
+          client.from('fee_adjustments').select('*').order('created_at', { ascending: false }),
+          client.from('enquiries').select('*').order('created_at', { ascending: false })
+        ]);
+
+        state.batches = batchesRes.data || [];
+        state.students = studentsRes.data || [];
+        state.attendanceLocks = locksRes.data || [];
+        state.holidays = holidaysRes.data || [];
+        state.tests = testsRes.data || [];
+        state.testScores = scoresRes.data || [];
+        state.payments = paymentsRes.data || [];
+        state.discounts = discountsRes.data || [];
+        state.enquiries = enquiriesRes.data || [];
+
+        renderActiveTab();
+        if (manual) showToast("Latest data successfully loaded!");
       } catch (err) {
-        showToast(err.message || "Registration rejected.", true);
+        showToast("Sync error: " + err.message, true);
+      } finally {
+        if (icon) icon.classList.remove('fa-spin');
       }
     }
 
-    async function handleAuthenticatedUser(user) {
-      try {
-        const { data: memberData } = await supabase
-          .from('members')
-          .select('institute_id, role, institutes(name)')
-          .eq('user_id', user.id)
-          .single();
-
-        if (memberData) {
-          currentMembership = {
-            institute_id: memberData.institute_id,
-            role: memberData.role,
-            institute_name: memberData.institutes.name
-          };
-        }
-      } catch(e) {}
-
-      document.getElementById('authContainer').classList.add('hidden');
-      document.getElementById('mainAppShell').classList.remove('hidden');
-      document.getElementById('mainAppShell').classList.add('flex');
-
-      document.getElementById('displayInstituteName').textContent = currentMembership.institute_name;
-      document.getElementById('displayUserEmail').textContent = user.email;
-      document.getElementById('userRoleBadge').textContent = currentMembership.role;
-
-      await loadCloudData();
-    }
-
-    async function loadCloudData() {
-      if (!supabase) return;
-      try {
-        const { data: students, error } = await supabase
-          .from('students')
-          .select(`
-            id, full_name, grade_level, roll_number, guardian_name, guardian_phone, total_agreed_fee,
-            fee_transactions(amount_paid),
-            attendance_records(date, status)
-          `)
-          .order('created_at', { ascending: false });
-
-        if (!error && students && students.length > 0) {
-          studentsCache = students.map(s => {
-            const paid = (s.fee_transactions || []).reduce((acc, t) => acc + Number(t.amount_paid), 0);
-            return {
-              ...s,
-              total_paid: paid,
-              balance_due: Math.max(0, Number(s.total_agreed_fee) - paid)
-            };
-          });
-        } else if (studentsCache.length === 0) {
-          studentsCache = [...INITIAL_PREVIEW_ROSTER];
-        }
-      } catch (err) {
-        if (studentsCache.length === 0) studentsCache = [...INITIAL_PREVIEW_ROSTER];
-      }
-      renderActiveView();
-    }
-
-    function handleSignOut() {
-      if (supabase) supabase.auth.signOut();
-      document.getElementById('mainAppShell').classList.add('hidden');
-      document.getElementById('mainAppShell').classList.remove('flex');
-      document.getElementById('authContainer').classList.remove('hidden');
-      showToast("Signed out safely.");
-    }
-
-    // --- NAVIGATION & FILTERS ---
-    function switchTab(t) {
-      currentTab = t;
-      ['dashboard', 'fees', 'attendance', 'students'].forEach(id => {
-        const btn = document.getElementById('nav-' + id);
+    function setTab(tab) {
+      activeTab = tab;
+      const tabs = ['dashboard', 'batches', 'students', 'attendance', 'fees', 'tests', 'enquiries'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('nav-' + t);
         if (btn) {
-          btn.className = (id === t) 
-            ? 'flex flex-col items-center gap-0.5 text-amber-400 p-1' 
-            : 'flex flex-col items-center gap-0.5 text-stone-400 p-1';
+          btn.className = (t === tab)
+            ? 'px-3 py-1.5 font-bold rounded-xl bg-amber-400 text-slate-950'
+            : 'px-3 py-1.5 font-semibold text-slate-300';
         }
       });
-      renderActiveView();
+      renderActiveTab();
     }
 
-    function handleSearch(val) {
-      searchQuery = val.trim().toLowerCase();
-      renderActiveView();
+    function renderActiveTab() {
+      const body = document.getElementById('appBody');
+      body.innerHTML = '';
+      if (activeTab === 'dashboard') renderDashboardView(body);
+      else if (activeTab === 'batches') renderBatchesView(body);
+      else if (activeTab === 'students') renderStudentsView(body);
+      else if (activeTab === 'attendance') renderAttendanceView(body);
+      else if (activeTab === 'fees') renderFeesView(body);
+      else if (activeTab === 'tests') renderTestsView(body);
+      else if (activeTab === 'enquiries') renderEnquiriesView(body);
     }
 
-    function filterByClass(cls) {
-      selectedClass = cls;
-      const classMap = {
-        'all': 'btn-cls-all',
-        'Class 9th': 'btn-cls-9',
-        'Class 10th': 'btn-cls-10',
-        'Class 11th': 'btn-cls-11',
-        'Class 12th': 'btn-cls-12'
-      };
+    function renderDashboardView(container) {
+      const activeStudents = state.students.filter(s => s.status === 'active');
+      const totalStudents = activeStudents.length;
 
-      Object.entries(classMap).forEach(([key, btnId]) => {
-        const b = document.getElementById(btnId);
-        if (b) {
-          b.className = (key === cls)
-            ? 'class-filter-btn px-3 py-1 text-[11px] font-bold rounded-lg bg-amber-400 text-stone-950 border border-stone-900 whitespace-nowrap ink-btn'
-            : 'class-filter-btn px-2.5 py-1 text-[11px] font-semibold text-stone-300 hover:text-white whitespace-nowrap';
-        }
+      let totalAgreed = 0;
+      let totalDiscounts = state.discounts.reduce((acc, d) => acc + Number(d.discount_amount), 0);
+      let totalPaid = state.payments.filter(p => p.status === 'active').reduce((acc, p) => acc + Number(p.amount), 0);
+
+      activeStudents.forEach(s => {
+        totalAgreed += Number(s.total_agreed_fee);
       });
-
-      document.getElementById('activeBatchText').textContent = cls === 'all' ? 'All Classes' : cls;
-      renderActiveView();
-    }
-
-    function getFilteredList() {
-      let list = studentsCache;
-      if (selectedClass !== 'all') {
-        list = list.filter(s => s.grade_level === selectedClass);
-      }
-      if (searchQuery) {
-        list = list.filter(s =>
-          s.full_name.toLowerCase().includes(searchQuery) ||
-          s.roll_number.toLowerCase().includes(searchQuery) ||
-          s.guardian_phone.includes(searchQuery)
-        );
-      }
-      return list;
-    }
-
-    function renderActiveView() {
-      const container = document.getElementById('mainContainer');
-      const list = getFilteredList();
-
-      document.getElementById('rosterCountBadge').textContent = `${list.length} Student${list.length === 1 ? '' : 's'}`;
-      container.innerHTML = '';
-
-      if (currentTab === 'dashboard') renderDashboardView(container, list);
-      else if (currentTab === 'fees') renderFeesView(container, list);
-      else if (currentTab === 'attendance') renderAttendanceView(container, list);
-      else if (currentTab === 'students') renderStudentsView(container, list);
-    }
-
-    // --- VIEW 1: DASHBOARD ---
-    function renderDashboardView(container, list) {
-      const totalExpected = list.reduce((a, s) => a + Number(s.total_agreed_fee), 0);
-      const totalCollected = list.reduce((a, s) => a + Number(s.total_paid), 0);
-      const totalPending = Math.max(0, totalExpected - totalCollected);
-      const todayStr = new Date().toISOString().split('T')[0];
-
-      const presentCount = list.filter(s => 
-        (s.attendance_records || []).some(a => a.date === todayStr && a.status === 'present')
-      ).length;
-      const turnoutRate = list.length ? Math.round((presentCount / list.length) * 100) : 0;
-      const pendingStudents = list.filter(s => s.balance_due > 0);
+      const netTuition = Math.max(0, totalAgreed - totalDiscounts);
+      const totalPending = Math.max(0, netTuition - totalPaid);
+      const newEnquiries = state.enquiries.filter(e => e.status === 'New' || e.status === 'Follow-up').length;
 
       container.innerHTML = `
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <div onclick="switchTab('fees')" class="ink-card p-4 bg-rose-900 text-white cursor-pointer active:scale-95 transition-transform flex flex-col justify-between">
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-rose-200">Pending Tuition</span>
-              <h3 class="text-2xl font-black mt-1 leading-tight">${formatINR(totalPending)}</h3>
-            </div>
-            <p class="text-[11px] text-rose-200 mt-2 flex items-center gap-1.5 font-semibold">
-              <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i> WhatsApp mother alert queue
-            </p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="ink-card p-3.5 bg-white border-slate-800">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Active Enrolled</span>
+            <p class="text-xl font-black text-slate-900 mt-1">${totalStudents}</p>
           </div>
-
-          <div class="ink-card p-4 bg-white flex flex-col justify-between">
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-stone-600">Total Collected</span>
-              <h3 class="text-2xl font-bold text-stone-900 mt-1 leading-tight">${formatINR(totalCollected)}</h3>
-            </div>
-            <div class="mt-2">
-              <div class="flex justify-between text-[10px] text-stone-500 font-semibold mb-1">
-                <span>Progress</span>
-                <span>${totalExpected ? Math.round((totalCollected / totalExpected) * 100) : 0}%</span>
-              </div>
-              <div class="w-full bg-stone-200 h-2.5 rounded-full overflow-hidden border border-stone-300">
-                <div class="bg-emerald-600 h-full meter-fill" style="width: ${totalExpected ? Math.round((totalCollected / totalExpected) * 100) : 0}%"></div>
-              </div>
-            </div>
+          <div class="ink-card p-3.5 bg-rose-50 border-rose-800">
+            <span class="text-[10px] font-bold text-rose-700 uppercase tracking-wider block">Total Pending Fees</span>
+            <p class="text-xl font-black text-rose-700 mt-1">₹${totalPending.toLocaleString('en-IN')}</p>
           </div>
-
-          <div onclick="switchTab('attendance')" class="ink-card p-4 bg-white cursor-pointer hover:border-amber-500 transition-colors flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-stone-600">Today's Turnout</span>
-                <h4 class="text-base font-extrabold text-stone-900 mt-0.5">${presentCount} of ${list.length} Present</h4>
-              </div>
-              <div class="text-right">
-                <span class="text-2xl font-black text-indigo-950">${turnoutRate}%</span>
-              </div>
-            </div>
-            <div class="w-full bg-stone-200 h-2.5 rounded-full mt-2 overflow-hidden border border-stone-300">
-              <div class="bg-indigo-950 h-full meter-fill" style="width: ${turnoutRate}%"></div>
-            </div>
+          <div class="ink-card p-3.5 bg-emerald-50 border-emerald-800">
+            <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Fees Collected</span>
+            <p class="text-xl font-black text-emerald-800 mt-1">₹${totalPaid.toLocaleString('en-IN')}</p>
+          </div>
+          <div class="ink-card p-3.5 bg-amber-50 border-amber-800">
+            <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">Pending Enquiries</span>
+            <p class="text-xl font-black text-amber-800 mt-1">${newEnquiries}</p>
           </div>
         </div>
 
-        <div class="ink-card p-4 bg-white space-y-3 mt-4">
-          <div class="flex items-center justify-between pb-2 border-b-2 border-stone-100">
-            <h3 class="text-xs sm:text-sm font-bold text-stone-900 uppercase tracking-wide flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
-              Mother Tuition Alert Queue
-            </h3>
-            <button onclick="switchTab('fees')" class="text-xs font-bold text-indigo-950 hover:underline">View All &rarr;</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+          <div class="ink-card p-4 bg-white space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b">
+              <h3 class="text-xs font-black uppercase text-slate-800">Quick Batch Roster</h3>
+              <button onclick="setTab('batches')" class="text-xs text-amber-700 font-bold hover:underline">Manage Batches</button>
+            </div>
+            <div class="space-y-2">
+              ${state.batches.map(b => {
+                const bStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === b.id));
+                return `
+                  <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between text-xs">
+                    <div>
+                      <p class="font-bold text-slate-900">${b.name} <span class="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded ml-1">${b.standard}</span></p>
+                      <p class="text-[10px] text-slate-500">${b.timing} &bull; ${b.days.join(', ')}</p>
+                    </div>
+                    <span class="font-black text-slate-800 bg-amber-200 px-2 py-0.5 rounded-full text-[11px]">${bStudents.length} Students</span>
+                  </div>
+                `;
+              }).join('') || '<p class="text-xs text-slate-400 py-3 text-center">Koi batches nahi hain.</p>'}
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            ${pendingStudents.slice(0, 6).map(s => `
-              <div class="p-3 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between">
-                <div>
-                  <h5 class="text-xs font-bold text-stone-900">${s.full_name} <span class="text-[10px] text-stone-500 font-normal">(${s.grade_level})</span></h5>
-                  <p class="text-[11px] text-stone-600 font-medium">Guardian: <strong>${s.guardian_name}</strong></p>
-                  <p class="text-[10px] font-black text-rose-700 mt-0.5">Due: ${formatINR(s.balance_due)}</p>
-                </div>
-                <button onclick="sendWhatsAppReminder('${s.id}')" class="ink-btn bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                  <i class="fa-brands fa-whatsapp text-xs"></i> Alert
-                </button>
-              </div>
-            `).join('')}
-            ${pendingStudents.length === 0 ? '<p class="col-span-full text-center py-4 text-xs font-semibold text-emerald-700">All registered tuition fees are settled!</p>' : ''}
+          <div class="ink-card p-4 bg-white space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b">
+              <h3 class="text-xs font-black uppercase text-slate-800">Upcoming Fee Dues (Overdue Alert)</h3>
+              <button onclick="setTab('fees')" class="text-xs text-rose-700 font-bold hover:underline">Fee Ledger</button>
+            </div>
+            <div class="space-y-2">
+              ${state.students.slice(0, 5).map(s => {
+                const bal = computeStudentPendingBalance(s.id);
+                if (bal <= 0) return '';
+                return `
+                  <div class="p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 flex items-center justify-between text-xs">
+                    <div>
+                      <p class="font-bold text-slate-900">${s.student_name} (${s.standard})</p>
+                      <p class="text-[10px] text-slate-500">Parent: ${s.parent_name} (+91 ${s.parent_phone}) &bull; Due Day: ${s.fee_due_day}th</p>
+                    </div>
+                    <span class="font-black text-rose-700">₹${bal.toLocaleString('en-IN')} Due</span>
+                  </div>
+                `;
+              }).join('') || '<p class="text-xs text-slate-400 py-3 text-center">Koi overdue records nahi hain.</p>'}
+            </div>
           </div>
         </div>
       `;
     }
 
-    // --- VIEW 2: FEES LEDGER & PDF RECEIPTS ---
-    function renderFeesView(container, list) {
+    function renderBatchesView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
-          <h2 class="text-sm sm:text-base font-bold font-serif-title text-stone-950">Tuition Ledger & Collections</h2>
-          <span class="text-xs font-bold text-rose-700 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-lg">
-            ${list.filter(s => s.balance_due > 0).length} Outstanding
-          </span>
+          <div>
+            <h3 class="text-base font-black text-slate-900">Institute Batches</h3>
+            <p class="text-xs text-slate-500">Standard and Timing ke hisaab se batches organize karein</p>
+          </div>
+          <button onclick="openBatchModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
+            <i class="fa-solid fa-plus mr-1"></i> Add Batch
+          </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-2">
-          ${list.map(s => {
-            const isCleared = s.balance_due === 0;
-            const pct = Math.round((s.total_paid / (s.total_agreed_fee || 1)) * 100);
-
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+          ${state.batches.map(b => {
+            const count = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === b.id)).length;
             return `
-              <div class="ink-card p-4 bg-white flex flex-col justify-between space-y-3">
+              <div class="ink-card p-3.5 bg-white space-y-2 border-slate-800">
                 <div class="flex items-start justify-between">
                   <div>
-                    <div class="flex items-center gap-2">
-                      <h3 class="text-xs sm:text-sm font-bold text-stone-900">${s.full_name}</h3>
-                      <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isCleared ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                        ${isCleared ? 'Cleared' : 'Pending'}
-                      </span>
-                    </div>
-                    <p class="text-[11px] text-stone-600 mt-0.5">Mother: <strong>${s.guardian_name}</strong> &bull; ${s.grade_level}</p>
-                    <p class="text-[10px] text-stone-500">Phone: +91 ${s.guardian_phone}</p>
+                    <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full uppercase">${b.standard}</span>
+                    <h4 class="text-sm font-black text-slate-900 mt-1">${b.name}</h4>
                   </div>
-
-                  <div class="flex items-center gap-1.5">
-                    <button onclick="downloadPdfReceipt('${s.id}')" class="ink-btn bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                      <i class="fa-solid fa-file-pdf text-rose-600"></i> PDF
-                    </button>
-                    <button onclick="openFeeModal('${s.id}')" class="ink-btn bg-amber-400 hover:bg-amber-300 text-stone-950 text-[11px] font-bold px-2.5 py-1 rounded-lg">
-                      + Pay
-                    </button>
+                  <div class="flex items-center gap-1">
+                    <button onclick="openBatchModal('${b.id}')" class="text-slate-600 hover:text-slate-900 p-1"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+                    <button onclick="deleteBatch('${b.id}')" class="text-rose-600 hover:text-rose-900 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                   </div>
                 </div>
-
-                <div class="grid grid-cols-3 gap-2 bg-[#F6F2E5] p-2.5 rounded-xl text-center border border-stone-200 text-xs">
-                  <div>
-                    <span class="text-[10px] text-stone-500 font-semibold">Total</span>
-                    <p class="font-bold text-stone-900">${formatINR(s.total_agreed_fee)}</p>
-                  </div>
-                  <div>
-                    <span class="text-[10px] text-emerald-700 font-semibold">Paid</span>
-                    <p class="font-bold text-emerald-800">${formatINR(s.total_paid)}</p>
-                  </div>
-                  <div>
-                    <span class="text-[10px] text-rose-700 font-semibold">Due</span>
-                    <p class="font-black ${isCleared ? 'text-stone-400' : 'text-rose-700'}">${formatINR(s.balance_due)}</p>
-                  </div>
+                <p class="text-xs text-slate-600"><i class="fa-regular fa-clock mr-1"></i> ${b.timing}</p>
+                <div class="flex flex-wrap gap-1">
+                  ${b.days.map(d => `<span class="text-[9px] bg-slate-100 border px-1 rounded font-semibold text-slate-700">${d}</span>`).join('')}
                 </div>
-
-                <div class="w-full bg-stone-200 h-2 rounded-full overflow-hidden">
-                  <div class="${isCleared ? 'bg-emerald-600' : 'bg-rose-600'} h-full meter-fill" style="width: ${pct}%"></div>
-                </div>
-
-                <div class="pt-1 flex justify-between items-center">
-                  <span class="text-[11px] font-bold text-stone-500">Roll: ${s.roll_number}</span>
-                  <button onclick="sendWhatsAppReminder('${s.id}')" class="ink-btn bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Mom
-                  </button>
+                <div class="pt-2 border-t flex items-center justify-between text-xs text-slate-500">
+                  <span>Enrolled: <b>${count}</b> Students</span>
                 </div>
               </div>
             `;
           }).join('')}
-          ${list.length === 0 ? '<p class="col-span-full text-center py-8 text-xs text-stone-500">No matching students found.</p>' : ''}
+          ${state.batches.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi batch nahi banayi gayi hai. + Add Batch par click karein.</p>' : ''}
         </div>
       `;
     }
 
-    // --- VIEW 3: DAILY ATTENDANCE TRACKER ---
-    function renderAttendanceView(container, list) {
-      const todayStr = new Date().toISOString().split('T')[0];
+    function openBatchModal(batchId = null) {
+      const b = state.batches.find(x => x.id === batchId) || { name: '', standard: 'Class 10th', timing: '04:00 PM - 05:30 PM', days: ['Mon','Tue','Wed','Thu','Fri','Sat'] };
+      const allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <h3 class="text-sm font-black text-slate-900">${batchId ? 'Edit Batch' : 'Create New Batch'}</h3>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="handleSaveBatch(event, '${batchId || ''}')" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Batch Name *</label>
+            <input type="text" id="bm_name" required value="${b.name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Class 10th Evening Batch">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
+              <select id="bm_standard" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
+                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce']
+                  .map(st => `<option value="${st}" ${b.standard === st ? 'selected' : ''}>${st}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Timing *</label>
+              <input type="text" id="bm_timing" required value="${b.timing}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="04:00 PM - 05:30 PM">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-800 mb-1">Active Days</label>
+            <div class="grid grid-cols-4 gap-1.5" id="bm_days">
+              ${allDays.map(day => `
+                <label class="flex items-center gap-1.5 p-1.5 border rounded-lg bg-slate-50 cursor-pointer">
+                  <input type="checkbox" value="${day}" ${b.days.includes(day) ? 'checked' : ''} class="accent-slate-900">
+                  <span class="text-[11px] font-semibold">${day}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2 bg-slate-200 font-bold rounded-xl">Cancel</button>
+            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-white font-bold rounded-xl">Save Batch</button>
+          </div>
+        </form>
+      `;
+      openModal(content);
+    }
+
+    async function handleSaveBatch(e, batchId) {
+      e.preventDefault();
+      const name = document.getElementById('bm_name').value.trim();
+      const standard = document.getElementById('bm_standard').value;
+      const timing = document.getElementById('bm_timing').value.trim();
+      const dayCheckboxes = document.querySelectorAll('#bm_days input[type="checkbox"]:checked');
+      const days = Array.from(dayCheckboxes).map(c => c.value);
+
+      if (days.length === 0) {
+        showToast("Kam se kam ek din select karein!", true);
+        return;
+      }
+
+      const payload = { institute_id: currentInstitute.id, name, standard, timing, days };
+      let res;
+      if (batchId) {
+        res = await client.from('batches').update(payload).eq('id', batchId);
+      } else {
+        res = await client.from('batches').insert([payload]);
+      }
+
+      if (res.error) showToast(res.error.message, true);
+      else {
+        showToast("Batch save ho gayi!");
+        closeModal();
+        await refreshData();
+      }
+    }
+
+    async function deleteBatch(batchId) {
+      if (!confirm("Kya aap sach me is batch ko delete karna chahte hain?")) return;
+      const { error } = await client.from('batches').delete().eq('id', batchId);
+      if (error) showToast(error.message, true);
+      else {
+        showToast("Batch delete ho gayi.");
+        await refreshData();
+      }
+    }
+
+    function renderStudentsView(container) {
       container.innerHTML = `
-        <div class="flex items-center justify-between">
-          <h2 class="text-sm sm:text-base font-bold font-serif-title text-stone-950">Daily Turnout (${todayStr})</h2>
-          <button onclick="markAllPresent()" class="ink-btn text-[11px] sm:text-xs font-bold text-stone-950 bg-amber-400 hover:bg-amber-300 px-3 py-1.5 rounded-lg">
-            Mark All Present
-          </button>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Student Directory</h3>
+            <p class="text-xs text-slate-500">Total Enrolled: ${state.students.length} Students</p>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <input type="text" id="stdSearch" oninput="filterStudentRoster()" placeholder="Search by name/phone..." class="p-2 text-xs border-2 border-slate-900 rounded-xl bg-white w-full sm:w-48">
+            <button onclick="openAdmissionModal()" class="ink-btn bg-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl whitespace-nowrap">
+              + Admission Form
+            </button>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-          ${list.map(s => {
-            const todayRecord = (s.attendance_records || []).find(a => a.date === todayStr);
-            const currentStatus = todayRecord ? todayRecord.status : 'unrecorded';
-
-            return `
-              <div class="ink-card p-3 bg-white flex items-center justify-between">
-                <div>
-                  <h4 class="text-xs sm:text-sm font-bold text-stone-900">${s.full_name}</h4>
-                  <p class="text-[11px] text-stone-600">${s.grade_level} &bull; Roll: ${s.roll_number}</p>
-                  <p class="text-[10px] text-stone-500">Status: <strong class="uppercase ${currentStatus === 'present' ? 'text-emerald-700' : (currentStatus === 'absent' ? 'text-rose-700' : 'text-amber-700')}">${currentStatus}</strong></p>
-                </div>
-
-                <div class="flex items-center gap-1.5 bg-[#F6F2E5] p-1.5 rounded-xl border border-stone-300">
-                  <button onclick="setStudentAttendance('${s.id}', 'present')" 
-                          class="w-8 h-8 rounded-lg text-xs font-black transition-colors ${currentStatus === 'present' ? 'bg-emerald-700 text-white shadow' : 'text-stone-700 hover:bg-stone-200'}">
-                    P
-                  </button>
-                  <button onclick="setStudentAttendance('${s.id}', 'absent')" 
-                          class="w-8 h-8 rounded-lg text-xs font-black transition-colors ${currentStatus === 'absent' ? 'bg-rose-700 text-white shadow' : 'text-stone-700 hover:bg-stone-200'}">
-                    A
-                  </button>
-                  <button onclick="setStudentAttendance('${s.id}', 'late')" 
-                          class="w-8 h-8 rounded-lg text-xs font-black transition-colors ${currentStatus === 'late' ? 'bg-amber-600 text-white shadow' : 'text-stone-700 hover:bg-stone-200'}">
-                    L
-                  </button>
-                </div>
-              </div>
-            `;
-          }).join('')}
-          ${list.length === 0 ? '<p class="col-span-full text-center py-6 text-xs text-stone-500">No students enrolled in this batch.</p>' : ''}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3" id="studentsGrid">
+          ${renderStudentCards(state.students)}
         </div>
       `;
     }
 
-    // --- VIEW 4: STUDENT DIRECTORY ---
-    function renderStudentsView(container, list) {
-      container.innerHTML = `
-        <div class="flex items-center justify-between">
-          <h2 class="text-sm sm:text-base font-bold font-serif-title text-stone-950">Student Roster (${list.length})</h2>
-          <button onclick="openStudentModal()" class="ink-btn bg-amber-400 hover:bg-amber-300 text-stone-950 text-xs font-bold px-3 py-1.5 rounded-xl">
-            + Enroll New
-          </button>
-        </div>
+    function renderStudentCards(list) {
+      if (list.length === 0) return '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi student nahi mila.</p>';
+      return list.map(s => {
+        const studentBatches = (s.student_batches || []).map(sb => {
+          const b = state.batches.find(x => x.id === sb.batch_id);
+          return b ? b.name : '';
+        }).filter(Boolean);
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
-          ${list.map(s => `
-            <div class="ink-card p-3.5 bg-white space-y-2 flex flex-col justify-between">
+        const bal = computeStudentPendingBalance(s.id);
+        return `
+          <div class="ink-card p-3.5 bg-white space-y-2.5 border-slate-800">
+            <div class="flex items-start justify-between">
               <div>
-                <div class="flex items-center gap-2.5">
-                  <div class="w-9 h-9 rounded-xl bg-stone-900 text-amber-300 flex items-center justify-center font-bold text-sm">
-                    ${s.full_name.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 class="text-xs sm:text-sm font-bold text-stone-900">${s.full_name}</h3>
-                    <p class="text-[11px] text-stone-600">${s.grade_level} &bull; Roll: ${s.roll_number}</p>
-                  </div>
-                </div>
-                <div class="mt-2 text-xs text-stone-600 space-y-0.5">
-                  <p>Guardian: <strong>${s.guardian_name}</strong></p>
-                  <p>WhatsApp: +91 ${s.guardian_phone}</p>
-                  <p class="font-bold text-stone-800 pt-1">Fee Agreed: ${formatINR(s.total_agreed_fee)} (Paid: ${formatINR(s.total_paid)})</p>
-                </div>
+                <span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded uppercase">${s.standard}</span>
+                <h4 class="text-sm font-black text-slate-900 mt-1">${s.student_name}</h4>
+                <p class="text-[11px] text-slate-500"><i class="fa-solid fa-phone text-[9px] mr-1"></i>+91 ${s.student_phone}</p>
               </div>
+              <span class="text-xs font-black ${bal > 0 ? 'text-rose-700 bg-rose-50' : 'text-emerald-700 bg-emerald-50'} px-2 py-1 rounded-lg">
+                ${bal > 0 ? 'Due ₹' + bal.toLocaleString('en-IN') : 'Cleared'}
+              </span>
+            </div>
 
-              <div class="pt-2 border-t border-stone-200 flex items-center justify-between">
-                <button onclick="downloadPdfReceipt('${s.id}')" class="text-xs text-indigo-950 font-bold hover:underline">
-                  <i class="fa-solid fa-file-pdf text-rose-600 mr-1"></i> Receipt
-                </button>
-                <button onclick="deleteStudent('${s.id}')" class="text-xs text-rose-700 font-bold hover:underline">
-                  <i class="fa-solid fa-trash-can mr-1"></i> Delete
-                </button>
+            <div class="p-2 rounded-xl bg-slate-50 text-[11px] space-y-1">
+              <p class="text-slate-600"><b>Parent:</b> ${s.parent_name} (+91 ${s.parent_phone})</p>
+              <p class="text-slate-600 truncate"><b>School:</b> ${s.school || 'N/A'}</p>
+              <div class="flex flex-wrap gap-1 mt-1">
+                ${studentBatches.map(bn => `<span class="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-bold">${bn}</span>`).join('') || '<span class="text-[9px] text-rose-500">No batch assigned</span>'}
               </div>
             </div>
-          `).join('')}
-          ${list.length === 0 ? '<p class="col-span-full text-center py-6 text-xs text-stone-500">No students found matching your query.</p>' : ''}
+
+            <div class="pt-2 border-t flex items-center justify-between text-xs">
+              <button onclick="openStudentProfileModal('${s.id}')" class="text-amber-800 font-bold hover:underline">
+                <i class="fa-solid fa-id-card mr-1"></i> Full Profile
+              </button>
+              <div class="flex items-center gap-1.5">
+                <button onclick="openAdmissionModal('${s.id}')" class="text-slate-600 hover:text-slate-900 p-1" title="Edit Student"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="deleteStudent('${s.id}')" class="text-rose-600 hover:text-rose-900 p-1" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterStudentRoster() {
+      const q = document.getElementById('stdSearch').value.toLowerCase();
+      const filtered = state.students.filter(s => 
+        s.student_name.toLowerCase().includes(q) || 
+        s.student_phone.includes(q) || 
+        s.parent_phone.includes(q)
+      );
+      document.getElementById('studentsGrid').innerHTML = renderStudentCards(filtered);
+    }
+
+    function openAdmissionModal(studentId = null, prefillData = null) {
+      let s = state.students.find(x => x.id === studentId) || {
+        student_name: '', standard: 'Class 10th', student_phone: '', parent_name: '', parent_phone: '',
+        school: '', address: '', admission_date: new Date().toISOString().split('T')[0],
+        total_agreed_fee: 30000, fee_due_day: 5, student_batches: []
+      };
+
+      if (prefillData) {
+        s = { ...s, ...prefillData };
+      }
+
+      const assignedBatchIds = (s.student_batches || []).map(sb => sb.batch_id);
+
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <h3 class="text-sm font-black text-slate-900">${studentId ? 'Update Student Information' : 'New Student Admission Form'}</h3>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="handleSaveAdmission(event, '${studentId || ''}')" class="space-y-3 text-xs">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Student Full Name *</label>
+              <input type="text" id="adm_name" required value="${s.student_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Aakash Sharma">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
+              <select id="adm_standard" onchange="updateDynamicBatchDropdown()" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
+                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce']
+                  .map(st => `<option value="${st}" ${s.standard === st ? 'selected' : ''}>${st}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Assign Batches (Filtered by Standard) *</label>
+            <div id="dynamicBatchBox" class="p-2 border-2 border-slate-900 rounded-xl bg-slate-50 space-y-1 max-h-28 overflow-y-auto">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Student WhatsApp (10-Digit) *</label>
+              <input type="tel" id="adm_sphone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${s.student_phone}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="9876543210">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Parent Name *</label>
+              <input type="text" id="adm_pname" required value="${s.parent_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Parent / Guardian Name">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Parent WhatsApp (10-Digit) *</label>
+              <input type="tel" id="adm_pphone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${s.parent_phone}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="9876543210">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">School / College</label>
+              <input type="text" id="adm_school" value="${s.school || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Delhi Public School">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Total Agreed Fee (₹) *</label>
+              <input type="number" id="adm_totalfee" required min="0" value="${s.total_agreed_fee}" class="w-full p-2 border-2 border-slate-900 rounded-xl font-bold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Fee Due Date (Day) *</label>
+              <input type="number" id="adm_dueday" required min="1" max="31" value="${s.fee_due_day}" class="w-full p-2 border-2 border-slate-900 rounded-xl font-bold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Admission Date</label>
+              <input type="date" id="adm_date" required value="${s.admission_date}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Residential Address</label>
+            <input type="text" id="adm_address" value="${s.address || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Flat 402, City">
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2.5 bg-slate-200 font-bold rounded-xl">Cancel</button>
+            <button type="submit" class="w-1/2 ink-btn py-2.5 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Admission</button>
+          </div>
+        </form>
+      `;
+      openModal(content);
+      updateDynamicBatchDropdown(assignedBatchIds);
+    }
+
+    function updateDynamicBatchDropdown(preselected = []) {
+      const selectedStd = document.getElementById('adm_standard').value;
+      const box = document.getElementById('dynamicBatchBox');
+      const matchingBatches = state.batches.filter(b => b.standard === selectedStd);
+
+      if (matchingBatches.length === 0) {
+        box.innerHTML = `<p class="text-[10px] text-rose-600 font-semibold py-1">Is standard ki koi batch nahi mili. Kripya pehle Batches tab me banayein.</p>`;
+        return;
+      }
+
+      box.innerHTML = matchingBatches.map(b => `
+        <label class="flex items-center gap-2 p-1 hover:bg-slate-100 rounded cursor-pointer">
+          <input type="checkbox" name="adm_batches" value="${b.id}" ${preselected.includes(b.id) ? 'checked' : ''} class="accent-slate-900">
+          <span class="text-xs font-semibold text-slate-800">${b.name} (${b.timing})</span>
+        </label>
+      `).join('');
+    }
+
+    async function handleSaveAdmission(e, studentId) {
+      e.preventDefault();
+      const student_name = document.getElementById('adm_name').value.trim();
+      const standard = document.getElementById('adm_standard').value;
+      const student_phone = document.getElementById('adm_sphone').value.trim();
+      const parent_name = document.getElementById('adm_pname').value.trim();
+      const parent_phone = document.getElementById('adm_pphone').value.trim();
+      const school = document.getElementById('adm_school').value.trim();
+      const total_agreed_fee = Number(document.getElementById('adm_totalfee').value);
+      const fee_due_day = Number(document.getElementById('adm_dueday').value);
+      const admission_date = document.getElementById('adm_date').value;
+      const address = document.getElementById('adm_address').value.trim();
+
+      const batchCheckboxes = document.querySelectorAll('input[name="adm_batches"]:checked');
+      const selectedBatchIds = Array.from(batchCheckboxes).map(c => c.value);
+
+      if (selectedBatchIds.length === 0) {
+        showToast("Kam se kam ek batch select karein!", true);
+        return;
+      }
+
+      const payload = {
+        institute_id: currentInstitute.id,
+        student_name, standard, student_phone, parent_name, parent_phone,
+        school, total_agreed_fee, fee_due_day, admission_date, address
+      };
+
+      let currentStudentId = studentId;
+
+      if (studentId) {
+        const { error } = await client.from('students').update(payload).eq('id', studentId);
+        if (error) { showToast(error.message, true); return; }
+      } else {
+        const { data, error } = await client.from('students').insert([payload]).select().single();
+        if (error) { showToast(error.message, true); return; }
+        currentStudentId = data.id;
+      }
+
+      await client.from('student_batches').delete().eq('student_id', currentStudentId);
+      const batchInserts = selectedBatchIds.map(bid => ({ student_id: currentStudentId, batch_id: bid }));
+      await client.from('student_batches').insert(batchInserts);
+
+      showToast("Admission record successfully saved!");
+      closeModal();
+      await refreshData();
+    }
+
+    async function deleteStudent(studentId) {
+      if (!confirm("Kya aap sach me is student ko delete karna chahte hain? Sabhi records delete ho jayenge.")) return;
+      const { error } = await client.from('students').delete().eq('id', studentId);
+      if (error) showToast(error.message, true);
+      else {
+        showToast("Student deleted.");
+        await refreshData();
+      }
+    }
+
+    let currentAttendanceBatch = null;
+    let currentAttendanceDate = new Date().toISOString().split('T')[0];
+
+    function renderAttendanceView(container) {
+      if (!currentAttendanceBatch && state.batches.length > 0) {
+        currentAttendanceBatch = state.batches[0].id;
+      }
+
+      const isLocked = state.attendanceLocks.some(l => l.batch_id === currentAttendanceBatch && l.attendance_date === currentAttendanceDate);
+      const isHoliday = state.holidays.some(h => h.holiday_date === currentAttendanceDate);
+      const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === currentAttendanceBatch));
+
+      container.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Attendance Register</h3>
+            <p class="text-xs text-slate-500">Submit hone ke baad attendance permanently lock ho jayegi</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="att_batch_select" onchange="changeAttendanceBatch(this.value)" class="p-2 text-xs font-bold border-2 border-slate-900 rounded-xl bg-white">
+              ${state.batches.map(b => `<option value="${b.id}" ${b.id === currentAttendanceBatch ? 'selected' : ''}>${b.name} (${b.standard})</option>`).join('')}
+            </select>
+            <input type="date" id="att_date_select" value="${currentAttendanceDate}" onchange="changeAttendanceDate(this.value)" class="p-2 text-xs font-bold border-2 border-slate-900 rounded-xl bg-white">
+          </div>
+        </div>
+
+        ${isHoliday ? `
+          <div class="p-3 bg-amber-100 border-2 border-amber-800 rounded-2xl flex items-center gap-2 text-xs font-bold text-amber-900">
+            <i class="fa-solid fa-umbrella-beach text-base"></i>
+            <span>Aaj Institute Holiday declare hai! Yeh din working days calculation me count nahi hoga.</span>
+          </div>
+        ` : ''}
+
+        ${isLocked ? `
+          <div class="p-3 bg-rose-100 border-2 border-rose-800 rounded-2xl flex items-center justify-between text-xs font-bold text-rose-900">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-lock text-base"></i>
+              <span>Is batch aur date ki attendance LOCKED hai. Koi modification allow nahi hai.</span>
+            </div>
+            <span class="text-[10px] bg-rose-200 px-2 py-0.5 rounded">Database Protected</span>
+          </div>
+        ` : ''}
+
+        <div class="ink-card p-4 bg-white border-slate-800">
+          <div class="flex items-center justify-between pb-3 border-b">
+            <span class="text-xs font-bold text-slate-600">Students in Batch: <b>${batchStudents.length}</b></span>
+            ${!isLocked ? `
+              <div class="flex gap-2">
+                <button onclick="markAllAttendance('present')" class="text-xs bg-emerald-100 text-emerald-900 font-bold px-2 py-1 rounded">Mark All Present</button>
+                <button onclick="markAllAttendance('absent')" class="text-xs bg-rose-100 text-rose-900 font-bold px-2 py-1 rounded">Mark All Absent</button>
+              </div>
+            ` : ''}
+          </div>
+
+          <form id="attendanceForm" onsubmit="handleSubmitAttendance(event)" class="divide-y divide-slate-100">
+            ${batchStudents.map((s, idx) => `
+              <div class="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                  <p class="font-bold text-slate-900">${idx + 1}. ${s.student_name}</p>
+                  <p class="text-[10px] text-slate-500">Roll: STD-${s.id.slice(0,4)} &bull; Parent: ${s.parent_phone}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <label class="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" name="att_${s.id}" value="present" ${isLocked ? 'disabled' : ''} checked class="accent-emerald-600 w-4 h-4">
+                    <span class="font-bold text-emerald-700">P</span>
+                  </label>
+                  <label class="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" name="att_${s.id}" value="absent" ${isLocked ? 'disabled' : ''} class="accent-rose-600 w-4 h-4">
+                    <span class="font-bold text-rose-700">A</span>
+                  </label>
+                </div>
+              </div>
+            `).join('')}
+            ${batchStudents.length === 0 ? '<p class="text-xs text-slate-400 py-6 text-center">Is batch me koi student nahi hai.</p>' : ''}
+
+            ${(!isLocked && batchStudents.length > 0) ? `
+              <div class="pt-4 flex justify-end">
+                <button type="submit" id="submitAttBtn" class="ink-btn bg-slate-900 text-amber-300 font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-2">
+                  <i class="fa-solid fa-lock text-xs"></i> Submit & Lock Attendance
+                </button>
+              </div>
+            ` : ''}
+          </form>
         </div>
       `;
     }
 
-    // --- STUDENT ENROLLMENT & ACTIONS ---
-    function openStudentModal() {
-      document.getElementById('studentForm').reset();
-      if (selectedClass !== 'all') {
-        document.getElementById('formClass').value = selectedClass;
-      }
-      document.getElementById('studentModal').classList.remove('hidden');
+    function changeAttendanceBatch(bid) { currentAttendanceBatch = bid; renderActiveTab(); }
+    function changeAttendanceDate(d) { currentAttendanceDate = d; renderActiveTab(); }
+
+    function markAllAttendance(status) {
+      const radios = document.querySelectorAll(`#attendanceForm input[type="radio"][value="${status}"]`);
+      radios.forEach(r => r.checked = true);
     }
 
-    function closeStudentModal() {
-      document.getElementById('studentModal').classList.add('hidden');
-    }
-
-    async function handleSaveStudent(e) {
+    async function handleSubmitAttendance(e) {
       e.preventDefault();
-      const fullName = document.getElementById('formName').value.trim();
-      const gradeLevel = document.getElementById('formClass').value;
-      const rollNumber = document.getElementById('formRoll').value.trim();
-      const guardianName = document.getElementById('formGuardianName').value.trim();
-      const guardianPhone = document.getElementById('formPhone').value.trim();
-      const totalAgreedFee = Number(document.getElementById('formTotalFee').value) || 0;
-      const initialPayment = Number(document.getElementById('formInitialPayment').value) || 0;
+      if (!confirm("DHYAN DEIN: Ek baar submit karne ke baad is din ki attendance LOCK ho jayegi aur koi badlav nahi ho sakega. Kya aap confirm karte hain?")) return;
 
-      if (!/^[6-9]\d{9}$/.test(guardianPhone)) {
-        showToast("Enter a valid 10-digit Indian phone number.", true);
-        return;
-      }
+      const btn = document.getElementById('submitAttBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Locking Attendance...`;
 
-      if (initialPayment > totalAgreedFee) {
-        showToast("Initial payment cannot exceed total fee.", true);
-        return;
-      }
+      const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === currentAttendanceBatch));
+      const records = [];
 
-      const newStudent = {
-        id: 'std-' + Date.now(),
-        institute_id: currentMembership.institute_id,
-        full_name: fullName,
-        grade_level: gradeLevel,
-        roll_number: rollNumber,
-        guardian_name: guardianName,
-        guardian_phone: guardianPhone,
-        total_agreed_fee: totalAgreedFee,
-        total_paid: initialPayment,
-        balance_due: Math.max(0, totalAgreedFee - initialPayment),
-        attendance_records: [{ date: new Date().toISOString().split('T')[0], status: 'present' }]
-      };
-
-      studentsCache.unshift(newStudent);
-
-      // Cloud synchronization if database active
-      if (supabase) {
-        try {
-          const { data, error } = await supabase.from('students').insert([{
-            institute_id: currentMembership.institute_id,
-            full_name: fullName,
-            grade_level: gradeLevel,
-            roll_number: rollNumber,
-            guardian_name: guardianName,
-            guardian_phone: guardianPhone,
-            total_agreed_fee: totalAgreedFee
-          }]).select().single();
-
-          if (data) {
-            newStudent.id = data.id;
-            await supabase.from('guardian_consents').insert([{
-              institute_id: currentMembership.institute_id,
-              student_id: data.id,
-              guardian_name: guardianName
-            }]);
-
-            if (initialPayment > 0) {
-              await supabase.from('fee_transactions').insert([{
-                institute_id: currentMembership.institute_id,
-                student_id: data.id,
-                amount_paid: initialPayment,
-                payment_mode: 'UPI',
-                receipt_number: 'REC-' + Date.now().toString().slice(-6)
-              }]);
-            }
-          }
-        } catch (err) {
-          console.warn("DB save sync:", err.message);
-        }
-      }
-
-      closeStudentModal();
-      renderActiveView();
-      showToast(`Enrolled ${fullName} successfully!`);
-    }
-
-    // --- FEE PAYMENT & RECEIPT ---
-    function openFeeModal(id) {
-      const s = studentsCache.find(x => x.id === id);
-      if (!s) return;
-      document.getElementById('feeStudentId').value = s.id;
-      document.getElementById('feeStudentName').textContent = `${s.full_name} (${s.grade_level})`;
-      document.getElementById('feeRemainingDisplay').textContent = formatINR(s.balance_due);
-      document.getElementById('feeAmount').value = s.balance_due > 0 ? s.balance_due : '';
-      document.getElementById('feeModal').classList.remove('hidden');
-    }
-
-    function closeFeeModal() {
-      document.getElementById('feeModal').classList.add('hidden');
-    }
-
-    async function handleRecordFee(e) {
-      e.preventDefault();
-      const studentId = document.getElementById('feeStudentId').value;
-      const amount = Number(document.getElementById('feeAmount').value) || 0;
-      const mode = document.getElementById('feeMode').value;
-      const s = studentsCache.find(x => x.id === studentId);
-
-      if (!s || amount <= 0) return;
-
-      if (amount > s.balance_due) {
-        showToast(`Amount exceeds outstanding due (${formatINR(s.balance_due)})`, true);
-        return;
-      }
-
-      s.total_paid += amount;
-      s.balance_due = Math.max(0, s.total_agreed_fee - s.total_paid);
-
-      const receiptNo = 'REC-' + Math.floor(100000 + Math.random() * 900000);
-
-      if (supabase) {
-        try {
-          await supabase.from('fee_transactions').insert([{
-            institute_id: currentMembership.institute_id,
-            student_id: s.id,
-            amount_paid: amount,
-            payment_mode: mode,
-            receipt_number: receiptNo
-          }]);
-        } catch (err) {
-          console.warn("Fee commit sync:", err.message);
-        }
-      }
-
-      closeFeeModal();
-      renderActiveView();
-      showToast(`Received payment of ${formatINR(amount)}!`);
-      setTimeout(() => downloadPdfReceipt(s.id), 300);
-    }
-
-    // --- ATTENDANCE MARKERS ---
-    function setStudentAttendance(id, status) {
-      const s = studentsCache.find(x => x.id === id);
-      if (!s) return;
-      const todayStr = new Date().toISOString().split('T')[0];
-
-      if (!s.attendance_records) s.attendance_records = [];
-      const existing = s.attendance_records.find(a => a.date === todayStr);
-      if (existing) {
-        existing.status = status;
-      } else {
-        s.attendance_records.push({ date: todayStr, status });
-      }
-
-      if (supabase) {
-        supabase.from('attendance_records').upsert({
-          institute_id: currentMembership.institute_id,
+      batchStudents.forEach(s => {
+        const checked = document.querySelector(`input[name="att_${s.id}"]:checked`);
+        records.push({
+          institute_id: currentInstitute.id,
+          batch_id: currentAttendanceBatch,
           student_id: s.id,
-          date: todayStr,
-          status: status
-        }, { onConflict: 'student_id,date' }).then(() => {});
-      }
-
-      renderActiveView();
-      showToast(`Marked ${s.full_name} ${status.toUpperCase()}`);
-    }
-
-    function markAllPresent() {
-      const list = getFilteredList();
-      const todayStr = new Date().toISOString().split('T')[0];
-
-      list.forEach(s => {
-        if (!s.attendance_records) s.attendance_records = [];
-        const existing = s.attendance_records.find(a => a.date === todayStr);
-        if (existing) existing.status = 'present';
-        else s.attendance_records.push({ date: todayStr, status: 'present' });
+          attendance_date: currentAttendanceDate,
+          status: checked ? checked.value : 'present'
+        });
       });
 
-      renderActiveView();
-      showToast(`Marked all ${list.length} students Present`);
+      const { error: insErr } = await client.from('attendance_records').upsert(records);
+      if (insErr) {
+        showToast("Error saving attendance: " + insErr.message, true);
+        btn.disabled = false;
+        return;
+      }
+
+      const { error: lockErr } = await client.from('attendance_locks').insert([{
+        institute_id: currentInstitute.id,
+        batch_id: currentAttendanceBatch,
+        attendance_date: currentAttendanceDate,
+        locked_by: currentUser.id
+      }]);
+
+      btn.disabled = false;
+      if (lockErr) {
+        showToast("Error locking attendance: " + lockErr.message, true);
+      } else {
+        showToast("Attendance successfully saved and locked!");
+        await refreshData();
+      }
     }
 
-    // --- DELETE RECORD ---
-    async function deleteStudent(id) {
-      const s = studentsCache.find(x => x.id === id);
+    let calendarMonth = new Date().getMonth();
+    let calendarYear = new Date().getFullYear();
+
+    async function openStudentProfileModal(studentId) {
+      const s = state.students.find(x => x.id === studentId);
       if (!s) return;
 
-      if (!confirm(`Are you sure you want to remove records for ${s.full_name}?`)) return;
+      const { data: attList } = await client.from('attendance_records').select('*').eq('student_id', studentId);
+      const studentTests = state.testScores.filter(sc => sc.student_id === studentId);
 
-      studentsCache = studentsCache.filter(x => x.id !== id);
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">${s.student_name} (${s.standard})</h3>
+            <p class="text-[10px] text-slate-500">Student 360° Profile & Performance</p>
+          </div>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
 
-      if (supabase) {
-        try {
-          await supabase.from('students').delete().eq('id', id);
-        } catch(e) {}
-      }
+        <div class="space-y-4 text-xs">
+          <div class="p-3 bg-slate-50 border rounded-2xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-black text-slate-800 uppercase tracking-wider text-[11px]">Monthly Attendance Calendar</span>
+              <div class="flex items-center gap-1">
+                <button onclick="shiftCalendarMonth('${studentId}', -1)" class="p-1 px-2 border rounded bg-white"><i class="fa-solid fa-chevron-left"></i></button>
+                <span class="font-bold text-[11px]">${new Date(calendarYear, calendarMonth).toLocaleString('default', { month: 'short', year: 'numeric' })}</span>
+                <button onclick="shiftCalendarMonth('${studentId}', 1)" class="p-1 px-2 border rounded bg-white"><i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+            </div>
 
-      renderActiveView();
-      showToast(`Removed student ${s.full_name}.`);
+            <div id="calendarSummaryBox" class="grid grid-cols-4 gap-1.5 text-center text-[10px]"></div>
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1 pt-2"></div>
+            <div class="flex items-center justify-center gap-3 pt-1 text-[10px] text-slate-500 font-semibold">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-emerald-500 rounded"></span> Present</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-rose-500 rounded"></span> Absent</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-slate-200 border rounded"></span> Holiday / Unrecorded</span>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-50 border rounded-2xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-black text-slate-800 uppercase tracking-wider text-[11px]">Test Score Trend (Trading Chart)</span>
+              <button onclick="downloadStudentMonthlyReport('${studentId}')" class="text-xs bg-slate-900 text-amber-300 font-bold px-2.5 py-1 rounded-lg">
+                <i class="fa-solid fa-file-pdf mr-1"></i> Monthly Report PDF
+              </button>
+            </div>
+            <div class="h-44 w-full">
+              <canvas id="studentPerformanceChart"></canvas>
+            </div>
+          </div>
+        </div>
+      `;
+
+      openModal(content);
+      buildCalendarGrid(studentId, attList || []);
+      renderTradingStyleChart(studentTests);
     }
 
-    // --- WHATSAPP NOTIFICATIONS ---
-    function sendWhatsAppReminder(id) {
-      const s = studentsCache.find(x => x.id === id);
-      if (!s || !s.guardian_phone) {
-        showToast("Valid guardian phone missing.", true);
+    function shiftCalendarMonth(studentId, delta) {
+      calendarMonth += delta;
+      if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+      if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+      openStudentProfileModal(studentId);
+    }
+
+    function buildCalendarGrid(studentId, attRecords) {
+      const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+
+      let presentCount = 0;
+      let absentCount = 0;
+      let holidayCount = 0;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const record = attRecords.find(r => r.attendance_date === dateStr);
+        const isHoliday = state.holidays.some(h => h.holiday_date === dateStr);
+
+        let color = 'bg-slate-200 text-slate-600 border border-slate-300';
+        if (isHoliday) {
+          color = 'bg-amber-100 text-amber-800 border border-amber-300';
+          holidayCount++;
+        } else if (record) {
+          if (record.status === 'present') {
+            color = 'bg-emerald-500 text-white font-bold';
+            presentCount++;
+          } else if (record.status === 'absent') {
+            color = 'bg-rose-500 text-white font-bold';
+            absentCount++;
+          }
+        }
+
+        grid.innerHTML += `
+          <div class="h-8 rounded flex items-center justify-center text-[10px] ${color}" title="${dateStr}">
+            ${day}
+          </div>
+        `;
+      }
+
+      const workingDays = Math.max(1, daysInMonth - holidayCount);
+      const percentage = Math.round((presentCount / workingDays) * 100);
+
+      document.getElementById('calendarSummaryBox').innerHTML = `
+        <div class="p-1 bg-white border rounded">Present: <b class="text-emerald-700">${presentCount}</b></div>
+        <div class="p-1 bg-white border rounded">Absent: <b class="text-rose-700">${absentCount}</b></div>
+        <div class="p-1 bg-white border rounded">Working: <b>${workingDays}</b></div>
+        <div class="p-1 bg-white border rounded">Attendance: <b class="${percentage >= 75 ? 'text-emerald-700' : 'text-rose-700'}">${percentage}%</b></div>
+      `;
+    }
+
+    function renderTradingStyleChart(scores) {
+      const ctx = document.getElementById('studentPerformanceChart').getContext('2d');
+      if (scores.length === 0) {
+        ctx.font = "11px system-ui";
+        ctx.fillStyle = "#94a3b8";
+        ctx.textAlign = "center";
+        ctx.fillText("Koi test scores record nahi hain", 150, 80);
         return;
       }
 
-      const msg = 
-`Notice from ${currentMembership.institute_name}
-Date: ${new Date().toLocaleDateString('en-IN')}
+      const scoreData = scores.map(s => {
+        const t = state.tests.find(x => x.id === s.test_id);
+        const pct = t ? Math.round((Number(s.marks_obtained) / Number(t.total_marks)) * 100) : 0;
+        return { label: t ? t.test_name : 'Test', pct };
+      });
 
-Dear Mother (${s.guardian_name}),
-Educational & tuition update for ${s.full_name} (${s.grade_level}):
-• Total Course Fee: INR ${s.total_agreed_fee.toLocaleString('en-IN')}
-• Fees Credited: INR ${s.total_paid.toLocaleString('en-IN')}
-• Outstanding Balance: INR ${s.balance_due.toLocaleString('en-IN')}
+      const colors = scoreData.map((d, i) => {
+        if (i === 0) return '#10b981';
+        return d.pct >= scoreData[i - 1].pct ? '#10b981' : '#ef4444';
+      });
 
-Kindly clear the balance at your earliest convenience.
-Academic Desk: +91 22 2756 0000`;
-
-      window.open(`https://wa.me/91${s.guardian_phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: scoreData.map(d => d.label),
+          datasets: [{
+            label: 'Score Percentage (%)',
+            data: scoreData.map(d => d.pct),
+            borderColor: '#0f172a',
+            borderWidth: 2,
+            pointBackgroundColor: colors,
+            pointRadius: 5,
+            tension: 0.2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+          }
+        }
+      });
     }
 
-    // --- JSPDF OFFICIAL RECEIPT DOWNLOAD ---
-    function downloadPdfReceipt(id) {
-      const s = studentsCache.find(x => x.id === id);
-      if (!s || !window.jspdf) {
-        showToast("PDF generator initializing...", true);
+    async function downloadStudentMonthlyReport(studentId) {
+      const s = state.students.find(x => x.id === studentId);
+      if (!s || !window.jspdf) return;
+
+      const { data: attRecords } = await client.from('attendance_records').select('*').eq('student_id', studentId);
+      const studentScores = state.testScores.filter(sc => sc.student_id === studentId);
+
+      const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+      let present = 0;
+      let holidays = 0;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const rec = (attRecords || []).find(r => r.attendance_date === dateStr);
+        if (rec && rec.status === 'present') present++;
+        if (state.holidays.some(h => h.holiday_date === dateStr)) holidays++;
+      }
+
+      const workingDays = Math.max(1, daysInMonth - holidays);
+      const attPct = Math.round((present / workingDays) * 100);
+
+      let performanceObservations = [];
+      if (studentScores.length >= 2) {
+        const lastScore = studentScores[studentScores.length - 1];
+        const prevScore = studentScores[studentScores.length - 2];
+        const lastTest = state.tests.find(t => t.id === lastScore.test_id);
+        const prevTest = state.tests.find(t => t.id === prevScore.test_id);
+
+        const lastPct = (Number(lastScore.marks_obtained) / Number(lastTest.total_marks)) * 100;
+        const prevPct = (Number(prevScore.marks_obtained) / Number(prevTest.total_marks)) * 100;
+        const diff = Math.round(lastPct - prevPct);
+
+        if (diff > 0) {
+          performanceObservations.push(`Is mahine ke aakhiri test (${lastTest.test_name}) me pichle test se ${diff}% score ka improvement darj hua.`);
+        } else if (diff < 0) {
+          performanceObservations.push(`Aakhiri test (${lastTest.test_name}) me pichle test ke mukable ${Math.abs(diff)}% kam marks prapt hue.`);
+        } else {
+          performanceObservations.push(`Dono pichle tests me marks ka percentage barabar raha.`);
+        }
+      } else if (studentScores.length === 1) {
+        performanceObservations.push(`Mahine me 1 test conduct kiya gaya jisme student ne marks prapt kiye.`);
+      } else {
+        performanceObservations.push(`Is mahine me koi formal test record uplabdh nahi hai.`);
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+
+      doc.setFontSize(16);
+      doc.text(currentInstitute.name, 40, 50);
+      doc.setFontSize(11);
+      doc.text(`Official Monthly Progress Report - ${new Date(calendarYear, calendarMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}`, 40, 70);
+      doc.line(40, 80, 550, 80);
+
+      doc.setFontSize(10);
+      doc.text(`Student Name: ${s.student_name}`, 40, 105);
+      doc.text(`Standard: ${s.standard}`, 40, 120);
+      doc.text(`Parent Name: ${s.parent_name} (+91 ${s.parent_phone})`, 40, 135);
+
+      doc.text(`Total Working Days: ${workingDays}`, 320, 105);
+      doc.text(`Present Days: ${present}`, 320, 120);
+      doc.text(`Monthly Attendance: ${attPct}%`, 320, 135);
+
+      doc.line(40, 150, 550, 150);
+      doc.setFontSize(12);
+      doc.text("Academic Performance (Test Records)", 40, 175);
+
+      let yPos = 200;
+      doc.setFontSize(9);
+      doc.text("Test Name", 40, yPos);
+      doc.text("Date", 180, yPos);
+      doc.text("Marks Obtained", 300, yPos);
+      doc.text("Total Marks", 420, yPos);
+      doc.line(40, yPos + 5, 550, yPos + 5);
+
+      studentScores.forEach(sc => {
+        const t = state.tests.find(x => x.id === sc.test_id);
+        if (t) {
+          yPos += 20;
+          doc.text(t.test_name, 40, yPos);
+          doc.text(t.test_date, 180, yPos);
+          doc.text(String(sc.marks_obtained), 300, yPos);
+          doc.text(String(t.total_marks), 420, yPos);
+        }
+      });
+
+      yPos += 35;
+      doc.line(40, yPos, 550, yPos);
+      yPos += 20;
+      doc.setFontSize(11);
+      doc.text("Data-Driven Performance Observations (Factual):", 40, yPos);
+      doc.setFontSize(9);
+      performanceObservations.forEach(obs => {
+        yPos += 18;
+        doc.text(`• ${obs}`, 50, yPos);
+      });
+
+      doc.save(`${s.student_name}_Monthly_Report.pdf`);
+      showToast("Report PDF downloaded!");
+    }
+
+    function computeStudentPendingBalance(studentId) {
+      const s = state.students.find(x => x.id === studentId);
+      if (!s) return 0;
+
+      const totalFee = Number(s.total_agreed_fee);
+      const discount = state.discounts
+        .filter(d => d.student_id === studentId)
+        .reduce((acc, d) => acc + Number(d.discount_amount), 0);
+
+      const paid = state.payments
+        .filter(p => p.student_id === studentId && p.status === 'active')
+        .reduce((acc, p) => acc + Number(p.amount), 0);
+
+      return Math.max(0, (totalFee - discount) - paid);
+    }
+
+    function renderFeesView(container) {
+      let totalTuition = 0;
+      let totalDiscounts = state.discounts.reduce((acc, d) => acc + Number(d.discount_amount), 0);
+      let totalCollected = state.payments.filter(p => p.status === 'active').reduce((acc, p) => acc + Number(p.amount), 0);
+
+      state.students.forEach(s => totalTuition += Number(s.total_agreed_fee));
+      const netTuition = Math.max(0, totalTuition - totalDiscounts);
+      const totalPending = Math.max(0, netTuition - totalCollected);
+
+      container.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Fee Ledger & Cash Flow</h3>
+            <p class="text-xs text-slate-500">Partial payments, receipts aur overpayment validation</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="broadcastFeeRemindersWhatsApp()" class="ink-btn bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5">
+              <i class="fa-brands fa-whatsapp text-sm"></i> Send Reminders (Pending Only)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+          <div class="ink-card p-3.5 bg-white border-slate-800">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Net Total Fee</span>
+            <p class="text-lg font-black text-slate-900 mt-0.5">₹${netTuition.toLocaleString('en-IN')}</p>
+          </div>
+          <div class="ink-card p-3.5 bg-emerald-50 border-emerald-800">
+            <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Total Collections</span>
+            <p class="text-lg font-black text-emerald-800 mt-0.5">₹${totalCollected.toLocaleString('en-IN')}</p>
+          </div>
+          <div class="ink-card p-3.5 bg-rose-50 border-rose-800">
+            <span class="text-[10px] font-bold text-rose-800 uppercase tracking-wider block">Total Balance Due</span>
+            <p class="text-lg font-black text-rose-800 mt-0.5">₹${totalPending.toLocaleString('en-IN')}</p>
+          </div>
+        </div>
+
+        <div class="ink-card p-4 bg-white mt-3 border-slate-800 space-y-3">
+          <h4 class="text-xs font-black uppercase text-slate-800">Student Account Ledgers</h4>
+          <div class="divide-y divide-slate-100">
+            ${state.students.map(s => {
+              const pending = computeStudentPendingBalance(s.id);
+              const paid = state.payments.filter(p => p.student_id === s.id && p.status === 'active').reduce((a, p) => a + Number(p.amount), 0);
+              const statusTag = pending === 0 ? '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold">Fully Paid</span>'
+                : paid > 0 ? '<span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded text-[10px] font-bold">Partially Paid</span>'
+                : '<span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-[10px] font-bold">Unpaid</span>';
+
+              return `
+                <div class="py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <p class="font-bold text-slate-900">${s.student_name} (${s.standard})</p>
+                      ${statusTag}
+                    </div>
+                    <p class="text-[11px] text-slate-500">Parent: ${s.parent_name} (+91 ${s.parent_phone}) &bull; Due Day: ${s.fee_due_day}th</p>
+                    <div class="flex gap-3 text-[11px] mt-0.5">
+                      <span>Total: <b>₹${Number(s.total_agreed_fee).toLocaleString('en-IN')}</b></span>
+                      <span>Paid: <b class="text-emerald-700">₹${paid.toLocaleString('en-IN')}</b></span>
+                      <span>Pending: <b class="text-rose-700">₹${pending.toLocaleString('en-IN')}</b></span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5 self-end sm:self-center">
+                    <button onclick="openRecordPaymentModal('${s.id}')" class="ink-btn bg-slate-900 text-amber-300 font-bold px-2.5 py-1.5 rounded-lg text-xs">
+                      + Add Payment
+                    </button>
+                    <button onclick="openFeeHistoryModal('${s.id}')" class="p-1.5 text-slate-600 hover:text-slate-900" title="History & Receipts">
+                      <i class="fa-solid fa-receipt text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function openRecordPaymentModal(studentId) {
+      const s = state.students.find(x => x.id === studentId);
+      if (!s) return;
+
+      const pending = computeStudentPendingBalance(studentId);
+
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">Record Fee Collection</h3>
+            <p class="text-[10px] text-slate-500">Student: ${s.student_name} (${s.standard})</p>
+          </div>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <form onsubmit="handleSavePayment(event, '${studentId}')" class="space-y-3.5 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-100 flex items-center justify-between">
+            <span class="font-bold text-slate-700">Current Pending Balance:</span>
+            <span class="text-sm font-black text-rose-700" id="modalPendingBalText">₹${pending.toLocaleString('en-IN')}</span>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-0.5">
+              <label class="block font-bold text-slate-800">Amount to Pay (₹) *</label>
+              <button type="button" onclick="document.getElementById('pay_amount').value = ${pending}" class="text-[10px] font-bold text-amber-700 underline">
+                Pay Full Pending
+              </button>
+            </div>
+            <input type="number" id="pay_amount" required min="1" max="${pending}" class="w-full p-2.5 border-2 border-slate-900 rounded-xl font-bold text-sm" placeholder="Enter amount">
+            <p id="pay_error" class="text-[10px] text-rose-600 font-bold mt-1 hidden"></p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Payment Mode *</label>
+              <select id="pay_mode" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white font-semibold">
+                <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
+                <option value="Cash">Cash in Hand</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Bank Transfer">Bank Transfer / NEFT</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Payment Date *</label>
+              <input type="date" id="pay_date" required value="${new Date().toISOString().split('T')[0]}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
+            </div>
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2.5 bg-slate-200 font-bold rounded-xl">Cancel</button>
+            <button type="submit" id="savePayBtn" class="w-1/2 ink-btn py-2.5 bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-check"></i> Save & Generate PDF
+            </button>
+          </div>
+        </form>
+      `;
+      openModal(content);
+    }
+
+    async function handleSavePayment(e, studentId) {
+      e.preventDefault();
+      const amount = Number(document.getElementById('pay_amount').value);
+      const mode = document.getElementById('pay_mode').value;
+      const payment_date = document.getElementById('pay_date').value;
+      const pending = computeStudentPendingBalance(studentId);
+      const errBox = document.getElementById('pay_error');
+
+      if (amount <= 0 || isNaN(amount)) {
+        errBox.textContent = "Amount positive number hona chahiye.";
+        errBox.classList.remove('hidden');
         return;
       }
+      if (amount > pending) {
+        const s = state.students.find(x => x.id === studentId);
+        errBox.textContent = `Total fees ₹${s.total_agreed_fee} hai. Abhi pending sirf ₹${pending} hai, aap ₹${amount} nahi daal sakte.`;
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      const btn = document.getElementById('savePayBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Recording...`;
+
+      const receipt_no = 'REC-' + Date.now().toString().slice(-6);
+
+      const { data, error } = await client.from('fee_payments').insert([{
+        institute_id: currentInstitute.id,
+        student_id: studentId,
+        amount,
+        payment_date,
+        mode,
+        receipt_no,
+        created_by: currentUser.id
+      }]).select().single();
+
+      btn.disabled = false;
+
+      if (error) {
+        showToast("Database Validation Failed: " + error.message, true);
+      } else {
+        showToast("Payment record ho gayi!");
+        closeModal();
+        await refreshData();
+        generatePDFReceipt(data.id);
+      }
+    }
+
+    function openFeeHistoryModal(studentId) {
+      const s = state.students.find(x => x.id === studentId);
+      const history = state.payments.filter(p => p.student_id === studentId);
+
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">Fee History & Receipts</h3>
+            <p class="text-[10px] text-slate-500">${s.student_name} (${s.standard})</p>
+          </div>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
+            ${history.map(p => `
+              <div class="py-2 flex items-center justify-between">
+                <div>
+                  <p class="font-bold text-slate-900">₹${Number(p.amount).toLocaleString('en-IN')} <span class="text-[10px] font-normal text-slate-500">via ${p.mode}</span></p>
+                  <p class="text-[10px] text-slate-400">Date: ${p.payment_date} &bull; No: ${p.receipt_no}</p>
+                  ${p.status === 'void' ? `<p class="text-[9px] text-rose-600 font-bold">CANCELLED / VOID: ${p.void_reason}</p>` : ''}
+                </div>
+                <div class="flex items-center gap-1.5">
+                  ${p.status === 'active' ? `
+                    <button onclick="generatePDFReceipt('${p.id}')" class="p-1 text-slate-600 hover:text-slate-900" title="PDF"><i class="fa-solid fa-file-pdf"></i></button>
+                    <button onclick="voidPaymentPrompt('${p.id}')" class="text-[10px] text-rose-700 font-bold hover:underline">Cancel / Void</button>
+                  ` : ''}
+                </div>
+              </div>
+            `).join('')}
+            ${history.length === 0 ? '<p class="text-xs text-slate-400 py-4 text-center">Koi payment history nahi mili.</p>' : ''}
+          </div>
+        </div>
+      `;
+      openModal(content);
+    }
+
+    function voidPaymentPrompt(paymentId) {
+      const reason = prompt("Payment cancel / void karne ka reason likhein:");
+      if (!reason || reason.trim() === '') return;
+
+      client.from('fee_payments').update({ status: 'void', void_reason: reason.trim() }).eq('id', paymentId).then(res => {
+        if (res.error) showToast(res.error.message, true);
+        else {
+          showToast("Payment record void kar di gayi.");
+          closeModal();
+          refreshData();
+        }
+      });
+    }
+
+    function generatePDFReceipt(paymentId) {
+      const p = state.payments.find(x => x.id === paymentId);
+      if (!p || !window.jspdf) return;
+      const s = state.students.find(x => x.id === p.student_id);
+      const pending = computeStudentPendingBalance(s.id);
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'pt', format: 'a5' });
 
-      // Header Banner
-      doc.setFillColor(28, 25, 20);
-      doc.rect(0, 0, 420, 52, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(246, 242, 229);
       doc.setFontSize(14);
-      doc.text(currentMembership.institute_name, 20, 26);
-      doc.setFontSize(8);
-      doc.text("Official Tuition Statement & Payment Receipt", 20, 42);
+      doc.text(currentInstitute.name, 30, 40);
+      doc.setFontSize(9);
+      doc.text("Official Tuition Fee Receipt", 30, 55);
+      doc.line(30, 65, 390, 65);
 
-      // Student Meta
-      doc.setTextColor(31, 27, 20);
       doc.setFontSize(10);
-      doc.text(`Student: ${s.full_name} (${s.grade_level})`, 20, 80);
-      doc.text(`Guardian: ${s.guardian_name} | Mobile: +91 ${s.guardian_phone}`, 20, 96);
-      doc.text(`Roll Number: ${s.roll_number}`, 20, 112);
-      doc.text(`Date of Issue: ${new Date().toLocaleDateString('en-IN')}`, 20, 128);
+      doc.text(`Receipt No: ${p.receipt_no}`, 30, 90);
+      doc.text(`Date: ${p.payment_date}`, 270, 90);
 
-      doc.setDrawColor(28, 25, 20);
-      doc.line(20, 142, 400, 142);
+      doc.text(`Student Name: ${s.student_name} (${s.standard})`, 30, 115);
+      doc.text(`Parent Name: ${s.parent_name} (+91 ${s.parent_phone})`, 30, 130);
+      doc.text(`Payment Mode: ${p.mode}`, 30, 145);
 
-      // Fee Breakdown
-      doc.text(`Total Agreed Tuition: Rs. ${s.total_agreed_fee.toLocaleString('en-IN')}`, 20, 168);
-      doc.setTextColor(16, 122, 70);
-      doc.text(`Total Amount Verified & Paid: Rs. ${s.total_paid.toLocaleString('en-IN')}`, 20, 188);
-      doc.setTextColor(190, 18, 60);
-      doc.text(`Current Outstanding Balance: Rs. ${s.balance_due.toLocaleString('en-IN')}`, 20, 208);
+      doc.line(30, 160, 390, 160);
+      doc.setFontSize(12);
+      doc.text(`Amount Received: INR ${Number(p.amount).toLocaleString('en-IN')}/-`, 30, 185);
+      doc.setFontSize(10);
+      doc.text(`Remaining Balance Due: INR ${pending.toLocaleString('en-IN')}/-`, 30, 205);
 
-      // Footer
+      doc.line(30, 220, 390, 220);
       doc.setFontSize(8);
-      doc.setTextColor(120, 120, 120);
-      doc.text("Generated securely by Apex Academy Management Cloud.", 20, 250);
+      doc.text("This is an electronically generated official receipt.", 30, 240);
 
-      doc.save(`FeeReceipt_${s.roll_number}.pdf`);
-      showToast("PDF Receipt downloaded!");
+      doc.save(`Receipt_${p.receipt_no}.pdf`);
+      showToast("Fee Receipt PDF generated!");
+    }
+
+    function broadcastFeeRemindersWhatsApp() {
+      const overdueStudents = state.students.filter(s => computeStudentPendingBalance(s.id) > 0);
+      if (overdueStudents.length === 0) {
+        showToast("Sabhi students ki fees cleared hai!");
+        return;
+      }
+
+      if (!confirm(`Total ${overdueStudents.length} pending students ko WhatsApp reminder open karna chahte hain?`)) return;
+
+      overdueStudents.forEach((s, idx) => {
+        setTimeout(() => {
+          const bal = computeStudentPendingBalance(s.id);
+          const msg = `Namaste ${s.parent_name} ji,\n\nYeh ${currentInstitute.name} ki taraf se notice hai. ${s.student_name} (${s.standard}) ki fee due date nikal chuki hai. Pending balance: INR ${bal.toLocaleString('en-IN')}.\n\nKripya jald se jald online ya institute aakar fees jama karayein. Dhanyawad!`;
+          window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }, idx * 1200);
+      });
+    }
+
+    function renderTestsView(container) {
+      container.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Tests & Examination Ledger</h3>
+            <p class="text-xs text-slate-500">Add tests, record marks aur performance track karein</p>
+          </div>
+          <button onclick="openTestModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
+            <i class="fa-solid fa-plus mr-1"></i> Add Test
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+          ${state.tests.map(t => {
+            const b = state.batches.find(x => x.id === t.batch_id);
+            const recordedCount = state.testScores.filter(sc => sc.test_id === t.id).length;
+            return `
+              <div class="ink-card p-3.5 bg-white border-slate-800 space-y-2">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded uppercase">${t.subject}</span>
+                    <h4 class="text-sm font-black text-slate-900 mt-1">${t.test_name}</h4>
+                    <p class="text-[10px] text-slate-500">Batch: ${b ? b.name : 'N/A'} &bull; Date: ${t.test_date}</p>
+                  </div>
+                  <span class="text-xs font-black text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg">Total: ${t.total_marks} Marks</span>
+                </div>
+                <div class="pt-2 border-t flex items-center justify-between text-xs">
+                  <span class="text-slate-500">Scores Recorded: <b>${recordedCount}</b></span>
+                  <button onclick="openRecordMarksModal('${t.id}')" class="text-amber-800 font-bold hover:underline">
+                    <i class="fa-solid fa-marker mr-1"></i> Enter / Edit Marks
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+          ${state.tests.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi test record nahi mila.</p>' : ''}
+        </div>
+      `;
+    }
+
+    function openTestModal() {
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <h3 class="text-sm font-black text-slate-900">Create Examination / Test</h3>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="handleSaveTest(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Test Name *</label>
+            <input type="text" id="tm_name" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Unit Test 1 - Thermodynamics">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Subject *</label>
+              <input type="text" id="tm_subject" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Physics">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Batch *</label>
+              <select id="tm_batch" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
+                ${state.batches.map(b => `<option value="${b.id}">${b.name} (${b.standard})</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Total Marks *</label>
+              <input type="number" id="tm_total" required min="1" class="w-full p-2 border-2 border-slate-900 rounded-xl font-bold" placeholder="50">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Test Date *</label>
+              <input type="date" id="tm_date" required value="${new Date().toISOString().split('T')[0]}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
+            </div>
+          </div>
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2 bg-slate-200 font-bold rounded-xl">Cancel</button>
+            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-white font-bold rounded-xl">Create Test</button>
+          </div>
+        </form>
+      `;
+      openModal(content);
+    }
+
+    async function handleSaveTest(e) {
+      e.preventDefault();
+      const test_name = document.getElementById('tm_name').value.trim();
+      const subject = document.getElementById('tm_subject').value.trim();
+      const batch_id = document.getElementById('tm_batch').value;
+      const total_marks = Number(document.getElementById('tm_total').value);
+      const test_date = document.getElementById('tm_date').value;
+
+      const { error } = await client.from('tests').insert([{
+        institute_id: currentInstitute.id, test_name, subject, batch_id, total_marks, test_date
+      }]);
+
+      if (error) showToast(error.message, true);
+      else {
+        showToast("Test successfully create ho gaya!");
+        closeModal();
+        await refreshData();
+      }
+    }
+
+    function openRecordMarksModal(testId) {
+      const t = state.tests.find(x => x.id === testId);
+      const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === t.batch_id));
+
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <div>
+            <h3 class="text-sm font-black text-slate-900">Record Test Marks</h3>
+            <p class="text-[10px] text-slate-500">${t.test_name} (Total: ${t.total_marks} Marks)</p>
+          </div>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <form onsubmit="handleSaveMarks(event, '${testId}')" class="space-y-3 text-xs max-h-72 overflow-y-auto pr-1">
+          ${batchStudents.map((s, idx) => {
+            const sc = state.testScores.find(x => x.test_id === testId && x.student_id === s.id);
+            return `
+              <div class="py-2 flex items-center justify-between border-b">
+                <div>
+                  <p class="font-bold text-slate-900">${idx + 1}. ${s.student_name}</p>
+                </div>
+                <div class="w-24">
+                  <input type="number" min="0" max="${t.total_marks}" step="0.5" name="mark_${s.id}" value="${sc ? sc.marks_obtained : ''}" placeholder="/ ${t.total_marks}" class="w-full p-1.5 border-2 border-slate-900 rounded-lg text-center font-bold">
+                </div>
+              </div>
+            `;
+          }).join('')}
+          <div class="pt-2">
+            <button type="submit" class="w-full ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save All Marks</button>
+          </div>
+        </form>
+      `;
+      openModal(content);
+    }
+
+    async function handleSaveMarks(e, testId) {
+      e.preventDefault();
+      const t = state.tests.find(x => x.id === testId);
+      const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === t.batch_id));
+
+      const inserts = [];
+      batchStudents.forEach(s => {
+        const val = document.querySelector(`input[name="mark_${s.id}"]`).value;
+        if (val !== '') {
+          inserts.push({
+            test_id: testId,
+            student_id: s.id,
+            marks_obtained: Number(val)
+          });
+        }
+      });
+
+      if (inserts.length > 0) {
+        const { error } = await client.from('test_scores').upsert(inserts, { onConflict: 'test_id,student_id' });
+        if (error) showToast(error.message, true);
+        else {
+          showToast("Marks successfully save ho gaye!");
+          closeModal();
+          await refreshData();
+        }
+      }
+    }
+
+    function renderEnquiriesView(container) {
+      container.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-black text-slate-900">Enquiry CRM & Pipeline</h3>
+            <p class="text-xs text-slate-500">Track leads, greetings aur 1-click admission conversion</p>
+          </div>
+          <button onclick="openEnquiryModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
+            <i class="fa-solid fa-plus mr-1"></i> New Enquiry
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+          ${state.enquiries.map(enq => `
+            <div class="ink-card p-3.5 bg-white border-slate-800 space-y-2">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded uppercase">${enq.standard}</span>
+                  <h4 class="text-sm font-black text-slate-900 mt-1">${enq.student_name}</h4>
+                  <p class="text-[11px] text-slate-500">+91 ${enq.phone} &bull; Source: ${enq.source}</p>
+                </div>
+                <select onchange="updateEnquiryStatus('${enq.id}', this.value)" class="text-[10px] font-bold p-1 rounded border border-slate-800 bg-amber-50">
+                  ${['New', 'Follow-up', 'Admitted', 'Not Interested'].map(st => `<option value="${st}" ${enq.status === st ? 'selected' : ''}>${st}</option>`).join('')}
+                </select>
+              </div>
+
+              <p class="text-xs text-slate-600 bg-slate-50 p-2 rounded-xl">${enq.notes || 'No notes added'}</p>
+
+              <div class="pt-2 border-t flex items-center justify-between text-xs">
+                <button onclick="sendEnquiryWhatsAppDirect('${enq.id}')" class="text-emerald-700 font-bold hover:underline flex items-center gap-1">
+                  <i class="fa-brands fa-whatsapp"></i> Welcome Msg
+                </button>
+                ${enq.status !== 'Admitted' ? `
+                  <button onclick="convertEnquiryToAdmission('${enq.id}')" class="text-amber-800 font-black hover:underline">
+                    Convert to Student &rarr;
+                  </button>
+                ` : '<span class="text-[10px] font-bold text-emerald-700">Enrolled</span>'}
+              </div>
+            </div>
+          `).join('')}
+          ${state.enquiries.length === 0 ? '<p class="text-xs text-slate-400 py-8 text-center col-span-full">Koi enquiries nahi hain.</p>' : ''}
+        </div>
+      `;
+    }
+
+    function openEnquiryModal() {
+      const content = `
+        <div class="flex items-center justify-between pb-2 border-b">
+          <h3 class="text-sm font-black text-slate-900">Add New Enquiry</h3>
+          <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="handleSaveEnquiry(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Student / Parent Name *</label>
+            <input type="text" id="eq_name" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Karan Patel">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">WhatsApp Phone (10-Digit) *</label>
+              <input type="tel" id="eq_phone" required pattern="^[6-9][0-9]{9}$" maxlength="10" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="9876543210">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
+              <select id="eq_standard" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
+                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce'].map(st => `<option value="${st}">${st}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Source *</label>
+            <select id="eq_source" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
+              <option value="Instagram / Social Media">Instagram / Social Media</option>
+              <option value="Friend / Student Reference">Friend / Student Reference</option>
+              <option value="Banner / Hoarding">Banner / Hoarding</option>
+              <option value="Direct Walk-in">Direct Walk-in</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Enquiry Notes</label>
+            <textarea id="eq_notes" rows="2" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Interested in JEE batches"></textarea>
+          </div>
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2 bg-slate-200 font-bold rounded-xl">Cancel</button>
+            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save & Send Welcome</button>
+          </div>
+        </form>
+      `;
+      openModal(content);
+    }
+
+    async function handleSaveEnquiry(e) {
+      e.preventDefault();
+      const student_name = document.getElementById('eq_name').value.trim();
+      const phone = document.getElementById('eq_phone').value.trim();
+      const standard = document.getElementById('eq_standard').value;
+      const source = document.getElementById('eq_source').value;
+      const notes = document.getElementById('eq_notes').value.trim();
+
+      const { data, error } = await client.from('enquiries').insert([{
+        institute_id: currentInstitute.id, student_name, phone, standard, source, notes
+      }]).select().single();
+
+      if (error) showToast(error.message, true);
+      else {
+        showToast("Enquiry saved!");
+        closeModal();
+        await refreshData();
+        sendEnquiryWhatsAppDirect(data.id);
+      }
+    }
+
+    function sendEnquiryWhatsAppDirect(enquiryId) {
+      const enq = state.enquiries.find(x => x.id === enquiryId);
+      if (!enq) return;
+
+      const msg = `Namaste ${enq.student_name} ji,\n\n${currentInstitute.name} me enquiry karne ke liye dhanyawad! Hamare yahan ${enq.standard} ke dedicated batches shuru ho rahe hain jisme expert faculty aur periodic test series shamil hai.\n\nBatches aur fee structure ki poori jankari ke liye kripya institute visit karein ya is number par contact karein.`;
+      window.open(`https://wa.me/91${enq.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    async function updateEnquiryStatus(enquiryId, status) {
+      const { error } = await client.from('enquiries').update({ status }).eq('id', enquiryId);
+      if (error) showToast(error.message, true);
+      else {
+        showToast(`Status updated to ${status}`);
+        await refreshData();
+      }
+    }
+
+    function convertEnquiryToAdmission(enquiryId) {
+      const enq = state.enquiries.find(x => x.id === enquiryId);
+      if (!enq) return;
+
+      openAdmissionModal(null, {
+        student_name: enq.student_name,
+        standard: enq.standard,
+        student_phone: enq.phone,
+        parent_phone: enq.phone,
+        parent_name: enq.student_name + " (Guardian)"
+      });
+
+      client.from('enquiries').update({ status: 'Admitted' }).eq('id', enquiryId).then(() => refreshData());
+    }
+
+    function openModal(htmlContent) {
+      const overlay = document.getElementById('modalOverlay');
+      const box = document.getElementById('modalBox');
+      box.innerHTML = htmlContent;
+      overlay.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.add('hidden');
     }
   </script>
 </body>
