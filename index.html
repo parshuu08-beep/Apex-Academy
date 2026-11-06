@@ -11,9 +11,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Supabase JS Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
-  <!-- jsPDF & AutoTable -->
+  <!-- jsPDF & AutoTable for Reports & Receipts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- Chart.js -->
+  <!-- Chart.js for Trading-View Style Performance Charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -42,14 +42,14 @@
     </div>
   </div>
 
-  <!-- AUTH SCREEN -->
+  <!-- AUTHENTICATION FORM -->
   <div id="authScreen" class="w-full max-w-md my-auto p-6 ink-card bg-amber-50 border-4 border-slate-900 shadow-2xl">
     <div class="text-center space-y-1 mb-6">
       <div class="w-14 h-14 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center mx-auto border-2 border-slate-900 shadow">
         <i class="fa-solid fa-graduation-cap text-2xl"></i>
       </div>
       <h1 class="text-2xl font-black text-slate-950 tracking-tight">CochiHelp</h1>
-      <p class="text-xs text-slate-600 font-semibold">Institute Administration & ERP</p>
+      <p class="text-xs text-slate-600 font-semibold">Institute Administration & ERP Portal</p>
     </div>
 
     <div class="flex border-2 border-slate-900 rounded-xl mb-4 overflow-hidden bg-slate-200 p-1 gap-1">
@@ -57,10 +57,10 @@
       <button id="authTabRegister" onclick="switchAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-lg text-center text-slate-700">Register Institute</button>
     </div>
 
-    <!-- Login -->
+    <!-- Login Form -->
     <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-xs block">
       <div>
-        <label class="block font-bold text-slate-800 mb-1">Director / Teacher Email</label>
+        <label class="block font-bold text-slate-800 mb-1">Director / Staff Email</label>
         <input type="email" id="loginEmail" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="admin@coaching.com">
       </div>
       <div>
@@ -72,14 +72,14 @@
       </button>
     </form>
 
-    <!-- Register -->
+    <!-- Register Form -->
     <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3.5 text-xs hidden">
       <div>
         <label class="block font-bold text-slate-800 mb-1">Coaching Institute Name</label>
         <input type="text" id="regInstituteName" required class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="e.g. Mastermind Classes">
       </div>
       <div>
-        <label class="block font-bold text-slate-800 mb-1">Official WhatsApp Phone (10-Digit)</label>
+        <label class="block font-bold text-slate-800 mb-1">Official WhatsApp / Contact Phone (10-Digit)</label>
         <input type="tel" id="regPhone" required pattern="^[6-9][0-9]{9}$" maxlength="10" class="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-white" placeholder="9876543210">
       </div>
       <div>
@@ -96,16 +96,16 @@
     </form>
   </div>
 
-  <!-- MAIN DASHBOARD -->
+  <!-- MAIN DASHBOARD SHELL -->
   <div id="mainApp" class="w-full max-w-6xl min-h-[92vh] bg-slate-50 border-4 border-slate-900 rounded-3xl flex-col hidden shadow-2xl my-2 overflow-hidden relative">
     
-    <!-- Header -->
+    <!-- Top Header -->
     <header class="bg-slate-900 text-slate-100 px-4 py-3 border-b-2 border-black flex flex-col gap-2">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div id="headerLogoContainer" class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black overflow-hidden border-2 border-slate-800">
             <i id="defaultLogoIcon" class="fa-solid fa-graduation-cap text-lg"></i>
-            <img id="customInstituteLogo" class="w-full h-full object-cover hidden" alt="Logo">
+            <img id="customInstituteLogo" class="w-full h-full object-cover hidden" alt="Institute Logo">
           </div>
           <div>
             <h2 id="headerInstituteName" class="text-sm sm:text-base font-black text-amber-300">CochiHelp</h2>
@@ -119,12 +119,12 @@
             <span class="hidden sm:inline">Refresh</span>
           </button>
 
-          <!-- KEBAB MENU BUTTON -->
+          <!-- Kebab Menu (⋮) -->
           <button onclick="toggleKebabMenu(event)" id="kebabBtn" class="ink-btn bg-amber-400 text-slate-950 text-xs px-2.5 py-1.5 rounded-xl font-black">
             <i class="fa-solid fa-ellipsis-vertical"></i>
           </button>
 
-          <!-- KEBAB DROPDOWN -->
+          <!-- Kebab Dropdown -->
           <div id="kebabDropdown" class="hidden absolute right-0 top-10 w-60 bg-white border-2 border-slate-900 rounded-2xl shadow-2xl py-2 z-50 text-xs text-slate-800 font-semibold space-y-1">
             <div class="px-3 py-1.5 border-b border-slate-100">
               <p class="text-[10px] text-slate-400 uppercase font-bold">Institute Portal</p>
@@ -163,19 +163,43 @@
       </nav>
     </header>
 
+    <!-- Main Dynamic Content Container -->
     <main id="appBody" class="flex-1 p-3 sm:p-5 overflow-y-auto space-y-4"></main>
   </div>
 
-  <!-- POPUP MODAL -->
+  <!-- MODAL CONTAINER (FOR POPUPS) -->
   <div id="modalOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
     <div id="modalBox" class="bg-white w-full max-w-lg rounded-2xl p-5 border-4 border-slate-900 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto"></div>
   </div>
 
   <script>
+    // =========================================================================
+    // CONFIGURATION & GLOBAL STATE
+    // =========================================================================
     const SUPABASE_CONFIG = {
       url: "https://tscsxhzwfregixatskqp.supabase.co",
       anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3N4aHp3ZnJlZ2l4YXRza3FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTU5ODMsImV4cCI6MjEwODk3MTk4M30.qxv-azvjt8OOuGGBPId6qMVe3lkr_kyHBiinYQKvU6c"
     };
+
+    // Full Uncut Standards List from Class 1st to 12th
+    const ALL_STANDARDS = [
+      'Class 1st',
+      'Class 2nd',
+      'Class 3rd',
+      'Class 4th',
+      'Class 5th',
+      'Class 6th',
+      'Class 7th',
+      'Class 8th',
+      'Class 9th',
+      'Class 10th',
+      'Class 11th Science',
+      'Class 11th Commerce',
+      'Class 11th Arts',
+      'Class 12th Science',
+      'Class 12th Commerce',
+      'Class 12th Arts'
+    ];
 
     let client = null;
     let currentUser = null;
@@ -195,6 +219,7 @@
       enquiries: []
     };
 
+    // Auto-detect Local Indian Date
     function getTodayIndianDate() {
       const now = new Date();
       const year = now.getFullYear();
@@ -206,6 +231,9 @@
     let currentAttendanceDate = getTodayIndianDate();
     let currentAttendanceBatch = null;
 
+    // =========================================================================
+    // INITIALIZATION & LISTENERS
+    // =========================================================================
     window.addEventListener('DOMContentLoaded', async () => {
       window.addEventListener('click', (e) => {
         if (!e.target.closest('#kebabBtn') && !e.target.closest('#kebabDropdown')) {
@@ -312,7 +340,7 @@
       if (error) {
         showToast(error.message, true);
       } else {
-        showToast("Institute ban gaya! Sign in kijiye.");
+        showToast("Institute ban gaya! Kripya Sign In karein.");
         switchAuthTab('login');
       }
     }
@@ -445,9 +473,9 @@
       else if (activeTab === 'enquiries') renderEnquiriesView(body);
     }
 
-    // ==========================================
-    // ABOUT US & SETTINGS (JPG FILE UPLOAD)
-    // ==========================================
+    // =========================================================================
+    // ABOUT US & EDIT PROFILE (WITH GALLERY JPG UPLOAD)
+    // =========================================================================
     function openInstituteAboutModal() {
       const content = `
         <div class="flex items-center justify-between pb-2 border-b">
@@ -462,12 +490,12 @@
             <div>
               <h4 class="text-sm font-black text-slate-900">${currentInstitute.name || 'Coaching Institute'}</h4>
               <p class="text-[11px] text-amber-800 font-bold">${currentInstitute.tagline || 'Excellence in Education'}</p>
-              <p class="text-[10px] text-slate-500">Contact: +91 ${currentInstitute.contact_phone || 'N/A'}</p>
+              <p class="text-[10px] text-slate-500">Official Contact: +91 ${currentInstitute.contact_phone || 'N/A'}</p>
             </div>
           </div>
           <div class="p-3 bg-white rounded-xl border space-y-1">
             <p class="font-bold text-slate-800"><i class="fa-solid fa-location-dot text-rose-600 mr-1"></i> Institute Address:</p>
-            <p class="text-slate-600">${currentInstitute.address || 'Address not updated.'}</p>
+            <p class="text-slate-600">${currentInstitute.address || 'Address not updated yet.'}</p>
             <p class="text-slate-600 font-semibold">${currentInstitute.city || ''}</p>
           </div>
           <div class="pt-2 flex justify-end">
@@ -498,7 +526,7 @@
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Tagline</label>
-              <input type="text" id="ins_tagline" value="${currentInstitute.tagline || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Board & JEE Prep">
+              <input type="text" id="ins_tagline" value="${currentInstitute.tagline || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Board & Exam Prep">
             </div>
           </div>
 
@@ -625,9 +653,9 @@
       showToast("CSV Downloaded!");
     }
 
-    // ==========================================
+    // =========================================================================
     // 1. DASHBOARD VIEW
-    // ==========================================
+    // =========================================================================
     function renderDashboardView(container) {
       const activeStudents = state.students.filter(s => s.status === 'active');
       let totalAgreed = 0;
@@ -679,15 +707,15 @@
       `;
     }
 
-    // ==========================================
-    // 2. BATCHES VIEW
-    // ==========================================
+    // =========================================================================
+    // 2. BATCHES VIEW (Class 1st to 12th Full Integration)
+    // =========================================================================
     function renderBatchesView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-base font-black text-slate-900">Institute Batches</h3>
-            <p class="text-xs text-slate-500">Standard and Timings</p>
+            <p class="text-xs text-slate-500">Standard 1st se 12th tak batches</p>
           </div>
           <button onclick="openBatchModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
             <i class="fa-solid fa-plus mr-1"></i> Add Batch
@@ -728,13 +756,13 @@
         <form onsubmit="handleSaveBatch(event)" class="space-y-3 text-xs">
           <div>
             <label class="block font-bold text-slate-800 mb-0.5">Batch Name *</label>
-            <input type="text" id="bm_name" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Class 10th Evening">
+            <input type="text" id="bm_name" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Class 5th Morning / Class 10th Evening">
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
               <select id="bm_standard" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
-                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce'].map(st => `<option value="${st}">${st}</option>`).join('')}
+                ${ALL_STANDARDS.map(st => `<option value="${st}">${st}</option>`).join('')}
               </select>
             </div>
             <div>
@@ -788,9 +816,9 @@
       }
     }
 
-    // ==========================================
-    // 3. STUDENTS & PAPER EVALUATION
-    // ==========================================
+    // =========================================================================
+    // 3. STUDENTS (VIEW, EDIT, DELETE & DIRECT CAMERA PAPER CHECKING)
+    // =========================================================================
     function renderStudentsView(container) {
       container.innerHTML = `
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
@@ -834,9 +862,17 @@
             </div>
 
             <div class="pt-2 border-t flex items-center justify-between text-xs gap-1">
-              <button onclick="openStudentPaperEvaluationModal('${s.id}')" class="ink-btn bg-slate-900 text-amber-300 font-bold px-2 py-1.5 rounded-lg text-[11px] flex items-center gap-1">
-                <i class="fa-solid fa-camera"></i> Test Paper
-              </button>
+              <div class="flex items-center gap-1.5">
+                <button onclick="openStudentPaperEvaluationModal('${s.id}')" class="ink-btn bg-slate-900 text-amber-300 font-bold px-2 py-1.5 rounded-lg text-[11px] flex items-center gap-1">
+                  <i class="fa-solid fa-camera"></i> Test Paper
+                </button>
+                <button onclick="openAdmissionModal('${s.id}')" title="Edit Student Information" class="ink-btn bg-slate-100 text-slate-800 p-1.5 rounded-lg hover:bg-slate-200">
+                  <i class="fa-solid fa-pen text-xs"></i>
+                </button>
+                <button onclick="deleteStudent('${s.id}')" title="Delete Student" class="p-1.5 text-rose-600 hover:text-rose-900">
+                  <i class="fa-solid fa-trash text-xs"></i>
+                </button>
+              </div>
               <button onclick="openStudentProfileModal('${s.id}')" class="text-amber-800 font-bold hover:underline text-[11px]">
                 Report & Boxes &rarr;
               </button>
@@ -856,18 +892,19 @@
       document.getElementById('studentsGrid').innerHTML = renderStudentCards(filtered);
     }
 
+    // Admission & Edit Form (Full Fields with Class 1st to 12th)
     function openAdmissionModal(studentId = null) {
       let s = state.students.find(x => x.id === studentId) || {
-        student_name: '', standard: 'Class 10th', student_phone: '', parent_name: '', parent_phone: '',
+        student_name: '', standard: 'Class 1st', student_phone: '', parent_name: '', parent_phone: '',
         school: '', address: '', admission_date: getTodayIndianDate(),
-        total_agreed_fee: 30000, fee_due_day: 5, student_batches: []
+        total_agreed_fee: 15000, fee_due_day: 5, student_batches: []
       };
 
       const assignedBatchIds = (s.student_batches || []).map(sb => sb.batch_id);
 
       const content = `
         <div class="flex items-center justify-between pb-2 border-b">
-          <h3 class="text-sm font-black text-slate-900">Admission Form</h3>
+          <h3 class="text-sm font-black text-slate-900">${studentId ? 'Edit Student Details' : 'Admission Form'}</h3>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form onsubmit="handleSaveAdmission(event, '${studentId || ''}')" class="space-y-3 text-xs">
@@ -879,13 +916,13 @@
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
               <select id="adm_standard" onchange="updateDynamicBatchDropdown()" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
-                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce'].map(st => `<option value="${st}" ${s.standard === st ? 'selected' : ''}>${st}</option>`).join('')}
+                ${ALL_STANDARDS.map(st => `<option value="${st}" ${s.standard === st ? 'selected' : ''}>${st}</option>`).join('')}
               </select>
             </div>
           </div>
 
           <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Select Batches *</label>
+            <label class="block font-bold text-slate-800 mb-0.5">Select Batches (Filtered by Standard) *</label>
             <div id="dynamicBatchBox" class="p-2 border-2 border-slate-900 rounded-xl bg-slate-50 space-y-1 max-h-24 overflow-y-auto"></div>
           </div>
 
@@ -906,7 +943,7 @@
               <input type="tel" id="adm_pphone" required pattern="^[6-9][0-9]{9}$" maxlength="10" value="${s.parent_phone}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
             <div>
-              <label class="block font-bold text-slate-800 mb-0.5">School</label>
+              <label class="block font-bold text-slate-800 mb-0.5">School / College</label>
               <input type="text" id="adm_school" value="${s.school || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
           </div>
@@ -922,9 +959,16 @@
             </div>
           </div>
 
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Residential Address</label>
+            <input type="text" id="adm_address" value="${s.address || ''}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Flat / House No, Area, City">
+          </div>
+
           <div class="pt-2 flex gap-2">
             <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2.5 bg-slate-200 font-bold rounded-xl">Cancel</button>
-            <button type="submit" class="w-1/2 ink-btn py-2.5 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Student</button>
+            <button type="submit" class="w-1/2 ink-btn py-2.5 bg-slate-900 text-amber-300 font-bold rounded-xl">
+              ${studentId ? 'Update Information' : 'Save Student'}
+            </button>
           </div>
         </form>
       `;
@@ -938,7 +982,7 @@
       const matchingBatches = state.batches.filter(b => b.standard === selectedStd);
 
       if (matchingBatches.length === 0) {
-        box.innerHTML = `<p class="text-[10px] text-rose-600 font-semibold py-1">Is standard ki batch nahi mili. Pehle batch banayein.</p>`;
+        box.innerHTML = `<p class="text-[10px] text-rose-600 font-semibold py-1">Is standard ki koi batch nahi mili. Pehle Batches tab me batch banayein.</p>`;
         return;
       }
 
@@ -958,19 +1002,20 @@
       const parent_name = document.getElementById('adm_pname').value.trim();
       const parent_phone = document.getElementById('adm_pphone').value.trim();
       const school = document.getElementById('adm_school').value.trim();
+      const address = document.getElementById('adm_address').value.trim();
       const total_agreed_fee = Number(document.getElementById('adm_totalfee').value);
       const fee_due_day = Number(document.getElementById('adm_dueday').value);
       const batchCheckboxes = document.querySelectorAll('input[name="adm_batches"]:checked');
       const selectedBatchIds = Array.from(batchCheckboxes).map(c => c.value);
 
       if (selectedBatchIds.length === 0) {
-        showToast("Batch select karein!", true);
+        showToast("Kam se kam ek batch select karein!", true);
         return;
       }
 
       const payload = {
         institute_id: currentInstitute.id, student_name, standard, student_phone,
-        parent_name, parent_phone, school, total_agreed_fee, fee_due_day
+        parent_name, parent_phone, school, address, total_agreed_fee, fee_due_day
       };
 
       let currentStudentId = studentId;
@@ -984,14 +1029,24 @@
       await client.from('student_batches').delete().eq('student_id', currentStudentId);
       await client.from('student_batches').insert(selectedBatchIds.map(bid => ({ student_id: currentStudentId, batch_id: bid })));
 
-      showToast("Student saved!");
+      showToast(studentId ? "Student updated successfully!" : "Student admission saved!");
       closeModal();
       await refreshData();
     }
 
-    // ================================================================
-    // CAMERA / DIRECT PAPER CHECKING
-    // ================================================================
+    async function deleteStudent(studentId) {
+      if (!confirm("Kya aap sach me is student ko delete karna chahte hain? Sabhi records delete ho jayenge.")) return;
+      const { error } = await client.from('students').delete().eq('id', studentId);
+      if (error) showToast(error.message, true);
+      else {
+        showToast("Student deleted.");
+        await refreshData();
+      }
+    }
+
+    // =========================================================================
+    // CAMERA / DIRECT TEST PAPER CHECKING FOR SPECIFIC STUDENT
+    // =========================================================================
     function openStudentPaperEvaluationModal(studentId) {
       const s = state.students.find(x => x.id === studentId);
       if (!s) return;
@@ -1107,9 +1162,9 @@
       window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    // ================================================================
+    // =========================================================================
     // 4. DAILY ATTENDANCE (DATE-BASED, LOCK & DAILY WHATSAPP)
-    // ================================================================
+    // =========================================================================
     function renderAttendanceView(container) {
       if (!currentAttendanceBatch && state.batches.length > 0) {
         currentAttendanceBatch = state.batches[0].id;
@@ -1268,9 +1323,9 @@
       });
     }
 
-    // ================================================================
-    // 5. STUDENT PROFILE: BOXES, TREND CHART & MONTHLY REPORT
-    // ================================================================
+    // =========================================================================
+    // 5. STUDENT PROFILE: CALENDAR BOXES, SCORE TREND & MONTHLY REPORT
+    // =========================================================================
     let calendarMonth = new Date().getMonth();
     let calendarYear = new Date().getFullYear();
 
@@ -1547,9 +1602,9 @@
       showToast("Report PDF downloaded!");
     }
 
-    // ==========================================
-    // 6. FEES LEDGER, RECEIPTS & VOID CANCEL
-    // ==========================================
+    // =========================================================================
+    // 6. FEES LEDGER, RECEIPTS, OVERPAYMENT VALIDATION & CANCEL VOID
+    // =========================================================================
     function computeStudentPendingBalance(studentId) {
       const s = state.students.find(x => x.id === studentId);
       if (!s) return 0;
@@ -1846,9 +1901,9 @@
       });
     }
 
-    // ==========================================
+    // =========================================================================
     // 7. TESTS LEDGER
-    // ==========================================
+    // =========================================================================
     function renderTestsView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
@@ -1872,7 +1927,7 @@
                     <h4 class="text-sm font-black text-slate-900 mt-1">${t.test_name}</h4>
                     <p class="text-[10px] text-slate-500">Batch: ${b ? b.name : 'N/A'} &bull; Date: ${t.test_date}</p>
                   </div>
-                  <span class="text-xs font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-lg">Max: ${t.total_marks} Marks</span>
+                  <span class="text-xs font-black text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg">Max: ${t.total_marks} Marks</span>
                 </div>
               </div>
             `;
@@ -1896,7 +1951,7 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Subject *</label>
-              <input type="text" id="tm_subject" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Physics">
+              <input type="text" id="tm_subject" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Science / Maths">
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Batch *</label>
@@ -1944,9 +1999,9 @@
       }
     }
 
-    // ==========================================
-    // 8. ENQUIRIES CRM
-    // ==========================================
+    // =========================================================================
+    // 8. ENQUIRIES CRM (Class 1st to 12th)
+    // =========================================================================
     function renderEnquiriesView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
@@ -1966,8 +2021,24 @@
                 <div>
                   <span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded uppercase">${enq.standard}</span>
                   <h4 class="text-sm font-black text-slate-900 mt-1">${enq.student_name}</h4>
-                  <p class="text-[11px] text-slate-500">+91 ${enq.phone}</p>
+                  <p class="text-[11px] text-slate-500">+91 ${enq.phone} &bull; Source: ${enq.source}</p>
                 </div>
+                <select onchange="updateEnquiryStatus('${enq.id}', this.value)" class="text-[10px] font-bold p-1 rounded border border-slate-800 bg-amber-50">
+                  ${['New', 'Follow-up', 'Admitted', 'Not Interested'].map(st => `<option value="${st}" ${enq.status === st ? 'selected' : ''}>${st}</option>`).join('')}
+                </select>
+              </div>
+
+              <p class="text-xs text-slate-600 bg-slate-50 p-2 rounded-xl">${enq.notes || 'No notes added'}</p>
+
+              <div class="pt-2 border-t flex items-center justify-between text-xs">
+                <button onclick="sendEnquiryWhatsAppDirect('${enq.id}')" class="text-emerald-700 font-bold hover:underline flex items-center gap-1">
+                  <i class="fa-brands fa-whatsapp"></i> Welcome Msg
+                </button>
+                ${enq.status !== 'Admitted' ? `
+                  <button onclick="convertEnquiryToAdmission('${enq.id}')" class="text-amber-800 font-black hover:underline">
+                    Convert to Student &rarr;
+                  </button>
+                ` : '<span class="text-[10px] font-bold text-emerald-700">Enrolled</span>'}
               </div>
             </div>
           `).join('')}
@@ -1995,13 +2066,26 @@
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Standard *</label>
               <select id="eq_standard" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
-                ${['Class 8th','Class 9th','Class 10th','Class 11th Science','Class 11th Commerce','Class 12th Science','Class 12th Commerce'].map(st => `<option value="${st}">${st}</option>`).join('')}
+                ${ALL_STANDARDS.map(st => `<option value="${st}">${st}</option>`).join('')}
               </select>
             </div>
           </div>
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Source *</label>
+            <select id="eq_source" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white">
+              <option value="Instagram / Social Media">Instagram / Social Media</option>
+              <option value="Friend / Student Reference">Friend / Student Reference</option>
+              <option value="Banner / Hoarding">Banner / Hoarding</option>
+              <option value="Direct Walk-in">Direct Walk-in</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-800 mb-0.5">Enquiry Notes</label>
+            <textarea id="eq_notes" rows="2" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Student requirements / details"></textarea>
+          </div>
           <div class="pt-2 flex gap-2">
             <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2 bg-slate-200 font-bold rounded-xl">Cancel</button>
-            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save Enquiry</button>
+            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-amber-300 font-bold rounded-xl">Save & Send Welcome</button>
           </div>
         </form>
       `;
@@ -2013,13 +2097,66 @@
       const student_name = document.getElementById('eq_name').value.trim();
       const phone = document.getElementById('eq_phone').value.trim();
       const standard = document.getElementById('eq_standard').value;
+      const source = document.getElementById('eq_source').value;
+      const notes = document.getElementById('eq_notes').value.trim();
 
-      await client.from('enquiries').insert([{ institute_id: currentInstitute.id, student_name, phone, standard, source: 'Walk-in' }]);
-      showToast("Enquiry saved!");
-      closeModal();
-      await refreshData();
+      const { data, error } = await client.from('enquiries').insert([{
+        institute_id: currentInstitute.id, student_name, phone, standard, source, notes
+      }]).select().single();
+
+      if (error) showToast(error.message, true);
+      else {
+        showToast("Enquiry saved!");
+        closeModal();
+        await refreshData();
+        sendEnquiryWhatsAppDirect(data.id);
+      }
     }
 
+    function sendEnquiryWhatsAppDirect(enquiryId) {
+      const enq = state.enquiries.find(x => x.id === enquiryId);
+      if (!enq) return;
+
+      const instName = currentInstitute.name || 'CochiHelp';
+      const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
+      const address = currentInstitute.address ? `${currentInstitute.address}, ${currentInstitute.city || ''}` : '';
+
+      const msg = `Namaste ${enq.student_name} ji,\n\n${instName} me enquiry karne ke liye dhanyawad! Hamare yahan ${enq.standard} ke dedicated batches shuru ho rahe hain jisme expert faculty aur periodic test series shamil hai.\n\n` +
+        (address ? `📍 *Location:* ${address}\n` : '') +
+        (instPhone ? `📞 *Contact:* ${instPhone}\n` : '') +
+        `\nKripya institute visit karein admission confirm karne ke liye.`;
+
+      window.open(`https://wa.me/91${enq.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    async function updateEnquiryStatus(enquiryId, status) {
+      const { error } = await client.from('enquiries').update({ status }).eq('id', enquiryId);
+      if (error) showToast(error.message, true);
+      else {
+        showToast(`Status updated to ${status}`);
+        await refreshData();
+      }
+    }
+
+    function convertEnquiryToAdmission(enquiryId) {
+      const enq = state.enquiries.find(x => x.id === enquiryId);
+      if (!enq) return;
+
+      openAdmissionModal(null);
+      // Pre-fill after DOM renders
+      setTimeout(() => {
+        document.getElementById('adm_name').value = enq.student_name;
+        document.getElementById('adm_standard').value = enq.standard;
+        document.getElementById('adm_sphone').value = enq.phone;
+        document.getElementById('adm_pphone').value = enq.phone;
+        document.getElementById('adm_pname').value = enq.student_name + " (Guardian)";
+        updateDynamicBatchDropdown();
+      }, 50);
+
+      client.from('enquiries').update({ status: 'Admitted' }).eq('id', enquiryId).then(() => refreshData());
+    }
+
+    // Modal Controller
     function openModal(htmlContent) {
       const overlay = document.getElementById('modalOverlay');
       const box = document.getElementById('modalBox');
