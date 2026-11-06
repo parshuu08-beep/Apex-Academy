@@ -181,7 +181,7 @@
       anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzY3N4aHp3ZnJlZ2l4YXRza3FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzOTU5ODMsImV4cCI6MjEwODk3MTk4M30.qxv-azvjt8OOuGGBPId6qMVe3lkr_kyHBiinYQKvU6c"
     };
 
-    // Full Uncut Standards List from Class 1st to 12th
+    // Full Standards List from Class 1st to 12th
     const ALL_STANDARDS = [
       'Class 1st',
       'Class 2nd',
@@ -219,7 +219,6 @@
       enquiries: []
     };
 
-    // Auto-detect Local Indian Date
     function getTodayIndianDate() {
       const now = new Date();
       const year = now.getFullYear();
@@ -474,7 +473,7 @@
     }
 
     // =========================================================================
-    // ABOUT US & EDIT PROFILE (WITH GALLERY JPG UPLOAD)
+    // ABOUT US & EDIT PROFILE
     // =========================================================================
     function openInstituteAboutModal() {
       const content = `
@@ -708,7 +707,7 @@
     }
 
     // =========================================================================
-    // 2. BATCHES VIEW (Class 1st to 12th Full Integration)
+    // 2. BATCHES VIEW
     // =========================================================================
     function renderBatchesView(container) {
       container.innerHTML = `
@@ -892,7 +891,6 @@
       document.getElementById('studentsGrid').innerHTML = renderStudentCards(filtered);
     }
 
-    // Admission & Edit Form (Full Fields with Class 1st to 12th)
     function openAdmissionModal(studentId = null) {
       let s = state.students.find(x => x.id === studentId) || {
         student_name: '', standard: 'Class 1st', student_phone: '', parent_name: '', parent_phone: '',
@@ -1902,14 +1900,14 @@
     }
 
     // =========================================================================
-    // 7. TESTS LEDGER
+    // 7. TESTS LEDGER (WITH EDIT, DELETE & ADVANCED MANAGEMENT)
     // =========================================================================
     function renderTestsView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-base font-black text-slate-900">Examinations & Tests</h3>
-            <p class="text-xs text-slate-500">Create new tests for batches</p>
+            <p class="text-xs text-slate-500">Create, edit, manage and evaluate batch tests</p>
           </div>
           <button onclick="openTestModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
             <i class="fa-solid fa-plus mr-1"></i> Add Test
@@ -1919,15 +1917,31 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
           ${state.tests.map(t => {
             const b = state.batches.find(x => x.id === t.batch_id);
+            const evaluatedCount = state.testScores.filter(sc => sc.test_id === t.id).length;
             return `
               <div class="ink-card p-3.5 bg-white border-slate-800 space-y-2">
                 <div class="flex items-start justify-between">
                   <div>
                     <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded uppercase">${t.subject}</span>
                     <h4 class="text-sm font-black text-slate-900 mt-1">${t.test_name}</h4>
-                    <p class="text-[10px] text-slate-500">Batch: ${b ? b.name : 'N/A'} &bull; Date: ${t.test_date}</p>
+                    <p class="text-[10px] text-slate-500">Batch: ${b ? b.name : 'All'} &bull; Date: ${t.test_date}</p>
                   </div>
-                  <span class="text-xs font-black text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg">Max: ${t.total_marks} Marks</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-black text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg">Max: ${t.total_marks}</span>
+                    <button onclick="openTestModal('${t.id}')" title="Edit Test Details" class="p-1.5 text-slate-600 hover:text-slate-900 bg-slate-100 rounded-lg">
+                      <i class="fa-solid fa-pen text-xs"></i>
+                    </button>
+                    <button onclick="deleteTest('${t.id}')" title="Delete Test" class="p-1.5 text-rose-600 hover:text-rose-900 bg-rose-50 rounded-lg">
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="pt-2 border-t flex items-center justify-between text-xs text-slate-500">
+                  <span>Papers Evaluated: <b>${evaluatedCount}</b></span>
+                  <button onclick="setTab('students')" class="text-amber-800 font-bold hover:underline text-[11px]">
+                    Evaluate from Students &rarr;
+                  </button>
                 </div>
               </div>
             `;
@@ -1937,49 +1951,56 @@
       `;
     }
 
-    function openTestModal() {
+    function openTestModal(testId = null) {
+      let t = state.tests.find(x => x.id === testId) || {
+        test_name: '', subject: 'Mathematics', batch_id: (state.batches[0] ? state.batches[0].id : ''),
+        total_marks: 50, test_date: getTodayIndianDate()
+      };
+
       const content = `
         <div class="flex items-center justify-between pb-2 border-b">
-          <h3 class="text-sm font-black text-slate-900">Create Examination / Test</h3>
+          <h3 class="text-sm font-black text-slate-900">${testId ? 'Edit Examination / Test' : 'Create Examination / Test'}</h3>
           <button onclick="closeModal()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <form onsubmit="handleSaveTest(event)" class="space-y-3 text-xs">
+        <form onsubmit="handleSaveTest(event, '${testId || ''}')" class="space-y-3 text-xs">
           <div>
             <label class="block font-bold text-slate-800 mb-0.5">Test Name *</label>
-            <input type="text" id="tm_name" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Unit Test 1 - Thermodynamics">
+            <input type="text" id="tm_name" required value="${t.test_name}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Unit Test 1 - Thermodynamics">
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Subject *</label>
-              <input type="text" id="tm_subject" required class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Science / Maths">
+              <input type="text" id="tm_subject" required value="${t.subject}" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Science / Maths">
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Batch *</label>
               <select id="tm_batch" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white font-semibold">
-                ${state.batches.map(b => `<option value="${b.id}">${b.name} (${b.standard})</option>`).join('')}
+                ${state.batches.map(b => `<option value="${b.id}" ${b.id === t.batch_id ? 'selected' : ''}>${b.name} (${b.standard})</option>`).join('')}
               </select>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Total Marks *</label>
-              <input type="number" id="tm_total" required min="1" class="w-full p-2 border-2 border-slate-900 rounded-xl font-bold" placeholder="50">
+              <input type="number" id="tm_total" required min="1" value="${t.total_marks}" class="w-full p-2 border-2 border-slate-900 rounded-xl font-bold">
             </div>
             <div>
               <label class="block font-bold text-slate-800 mb-0.5">Test Date *</label>
-              <input type="date" id="tm_date" required value="${getTodayIndianDate()}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
+              <input type="date" id="tm_date" required value="${t.test_date}" class="w-full p-2 border-2 border-slate-900 rounded-xl">
             </div>
           </div>
           <div class="pt-2 flex gap-2">
             <button type="button" onclick="closeModal()" class="w-1/2 ink-btn py-2 bg-slate-200 font-bold rounded-xl">Cancel</button>
-            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-white font-bold rounded-xl">Create Test</button>
+            <button type="submit" class="w-1/2 ink-btn py-2 bg-slate-900 text-white font-bold rounded-xl">
+              ${testId ? 'Update Test' : 'Create Test'}
+            </button>
           </div>
         </form>
       `;
       openModal(content);
     }
 
-    async function handleSaveTest(e) {
+    async function handleSaveTest(e, testId) {
       e.preventDefault();
       const test_name = document.getElementById('tm_name').value.trim();
       const subject = document.getElementById('tm_subject').value.trim();
@@ -1987,20 +2008,44 @@
       const total_marks = Number(document.getElementById('tm_total').value);
       const test_date = document.getElementById('tm_date').value;
 
-      const { error } = await client.from('tests').insert([{
+      const payload = {
         institute_id: currentInstitute.id, test_name, subject, batch_id, total_marks, test_date
-      }]);
+      };
+
+      let error = null;
+      if (testId) {
+        const res = await client.from('tests').update(payload).eq('id', testId);
+        error = res.error;
+      } else {
+        const res = await client.from('tests').insert([payload]);
+        error = res.error;
+      }
 
       if (error) showToast(error.message, true);
       else {
-        showToast("Test create ho gaya! Ab Students tab se paper photo click karein.");
+        showToast(testId ? "Test updated successfully!" : "Test created successfully!");
         closeModal();
         await refreshData();
       }
     }
 
+    async function deleteTest(testId) {
+      if (!confirm("Kya aap sach me is test ko delete karna chahte hain? Sabhi students ke marks bhi delete ho jayenge.")) return;
+      
+      // Delete associated test scores first
+      await client.from('test_scores').delete().eq('test_id', testId);
+      const { error } = await client.from('tests').delete().eq('id', testId);
+
+      if (error) {
+        showToast(error.message, true);
+      } else {
+        showToast("Test deleted successfully.");
+        await refreshData();
+      }
+    }
+
     // =========================================================================
-    // 8. ENQUIRIES CRM (Class 1st to 12th)
+    // 8. ENQUIRIES CRM
     // =========================================================================
     function renderEnquiriesView(container) {
       container.innerHTML = `
@@ -2143,7 +2188,6 @@
       if (!enq) return;
 
       openAdmissionModal(null);
-      // Pre-fill after DOM renders
       setTimeout(() => {
         document.getElementById('adm_name').value = enq.student_name;
         document.getElementById('adm_standard').value = enq.standard;
