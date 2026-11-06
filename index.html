@@ -326,7 +326,7 @@
       if (error) {
         showToast(error.message, true);
       } else {
-        showToast("Institute ban gaya! Kripya Sign In karein.");
+        showToast("Institute registered! Please Sign In.");
         switchAuthTab('login');
       }
     }
@@ -340,7 +340,7 @@
         .single();
 
       if (error || !member) {
-        showToast("Institute record nahi mila.", true);
+        showToast("Institute record not found.", true);
         return;
       }
 
@@ -520,7 +520,7 @@
             <label class="block font-bold text-slate-800 mb-0.5">Upload Logo (JPG / PNG from Phone / PC)</label>
             <input type="file" id="ins_logo_file" accept="image/jpeg,image/png,image/jpg" onchange="convertLogoToBase64(event)" class="w-full p-2 border-2 border-slate-900 rounded-xl bg-slate-50 text-[11px]">
             <input type="hidden" id="ins_logo_base64" value="${currentInstitute.logo_url || ''}">
-            <p class="text-[10px] text-slate-500 mt-0.5">Gallery se photo choose karein, URL ki zaroorat nahi hai.</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">Select image from gallery; direct upload supported.</p>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
@@ -548,7 +548,7 @@
       const reader = new FileReader();
       reader.onload = function(evt) {
         document.getElementById('ins_logo_base64').value = evt.target.result;
-        showToast("Logo JPG select ho gaya!");
+        showToast("Logo JPG selected!");
       };
       reader.readAsDataURL(file);
     }
@@ -599,7 +599,7 @@
               </div>
               <button onclick="deleteHoliday('${h.id}')" class="text-rose-600 hover:text-rose-800 text-xs"><i class="fa-solid fa-trash"></i></button>
             </div>
-          `).join('') || '<p class="text-xs text-slate-400 py-3 text-center">Koi holiday nahi hai.</p>'}
+          `).join('') || '<p class="text-xs text-slate-400 py-3 text-center">No holidays added.</p>'}
         </div>
       `;
       openModal(content);
@@ -803,7 +803,7 @@
     }
 
     // =========================================================================
-    // 3. STUDENTS (SIMPLIFIED ADMISSION WITH ONLY MANDATORY NAME & PARENT PHONE)
+    // 3. STUDENTS (SIMPLIFIED ADMISSION)
     // =========================================================================
     function renderStudentsView(container) {
       container.innerHTML = `
@@ -879,7 +879,6 @@
       document.getElementById('studentsGrid').innerHTML = renderStudentCards(filtered);
     }
 
-    // LIVE BALANCE CALCULATION HELPER
     function calculateLiveAdmissionBalance() {
       const total = Number(document.getElementById('adm_totalfee').value) || 0;
       const paid = Number(document.getElementById('adm_paidfee').value) || 0;
@@ -932,7 +931,7 @@
             </div>
           </div>
 
-          <!-- FEES SECTION (WITH DIRECT TRACKING) -->
+          <!-- FEES SECTION -->
           <div class="p-3 bg-slate-50 border-2 border-slate-300 rounded-2xl space-y-2.5">
             <span class="text-[10px] font-black uppercase tracking-wider text-slate-800 block">Fee Details & Breakdown</span>
 
@@ -948,14 +947,13 @@
               </div>
             </div>
 
-            <!-- Auto Balance Box -->
             <div class="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
               <span class="font-bold text-slate-700">Remaining / Balance Due:</span>
               <span id="admLiveBalText" class="text-base font-black ${currentBalance > 0 ? 'text-rose-600' : 'text-emerald-600'}">₹${currentBalance.toLocaleString('en-IN')}</span>
             </div>
           </div>
 
-          <!-- OPTIONAL SECTION ACCORDION / TOGGLE -->
+          <!-- OPTIONAL SECTION -->
           <div class="border rounded-2xl p-3 bg-slate-50 space-y-2.5">
             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Optional Information (Batch, Standard, Address)</span>
             
@@ -1045,7 +1043,7 @@
       const selectedBatchIds = Array.from(batchCheckboxes).map(c => c.value);
 
       if (!student_name || !parent_phone) {
-        showToast("Student Name aur Parent Phone bharna zaroori hai!", true);
+        showToast("Student Name and Parent Phone are required!", true);
         return;
       }
 
@@ -1077,7 +1075,6 @@
           if (insertErr) throw insertErr;
           currentStudentId = data.id;
 
-          // Agar new admission ke waqt initial paid fees enter ki hai, toh payment record auto-create ho jaye
           if (paid_fee > 0) {
             const receipt_no = 'REC-' + Date.now().toString().slice(-6);
             await client.from('fee_payments').insert([{
@@ -1092,7 +1089,6 @@
           }
         }
 
-        // Batches link update (if any selected)
         await client.from('student_batches').delete().eq('student_id', currentStudentId);
         if (selectedBatchIds.length > 0) {
           await client.from('student_batches').insert(selectedBatchIds.map(bid => ({ student_id: currentStudentId, batch_id: bid })));
@@ -1103,7 +1099,7 @@
         await refreshData();
       } catch (err) {
         console.error("Save Admission Error:", err);
-        alert("Admission save nahi hua! Error: " + (err.message || "Schema constraint error"));
+        alert("Admission save error: " + (err.message || "Schema constraint error"));
       } finally {
         btn.disabled = false;
         btn.innerHTML = studentId ? 'Update Information' : 'Save Student';
@@ -1111,7 +1107,7 @@
     }
 
     async function deleteStudent(studentId) {
-      if (!confirm("Kya aap sach me is student ko delete karna chahte hain? Sabhi records delete ho jayenge.")) return;
+      if (!confirm("Are you sure you want to delete this student? All linked records will be removed.")) return;
       
       try {
         await client.from('student_batches').delete().eq('student_id', studentId);
@@ -1150,16 +1146,16 @@
 
         <form onsubmit="handleSavePaperAndSendWhatsApp(event, '${studentId}')" class="space-y-3.5 text-xs">
           <div>
-            <label class="block font-bold text-slate-800 mb-0.5">Kaunsa Test Conduct Hua Hai? *</label>
+            <label class="block font-bold text-slate-800 mb-0.5">Select Conducted Test *</label>
             <select id="pe_test_id" required class="w-full p-2 border-2 border-slate-900 rounded-xl bg-white font-semibold">
               ${availableTests.map(t => `<option value="${t.id}">${t.test_name} - ${t.subject} (Max: ${t.total_marks} Marks)</option>`).join('')}
-              ${availableTests.length === 0 ? '<option disabled selected>Is batch ke liye koi test nahi bana hai</option>' : ''}
+              ${availableTests.length === 0 ? '<option disabled selected>No tests created for this batch</option>' : ''}
             </select>
           </div>
 
           <div>
             <label class="block font-bold text-slate-800 mb-0.5">Marks Obtained *</label>
-            <input type="number" id="pe_marks" required min="0" step="0.5" class="w-full p-2.5 border-2 border-slate-900 rounded-xl font-bold text-base" placeholder="Marks likhein">
+            <input type="number" id="pe_marks" required min="0" step="0.5" class="w-full p-2.5 border-2 border-slate-900 rounded-xl font-bold text-base" placeholder="Enter marks">
           </div>
 
           <div class="p-3 bg-slate-50 border-2 border-dashed border-slate-400 rounded-xl text-center space-y-2">
@@ -1167,7 +1163,7 @@
               <i class="fa-solid fa-camera"></i> Click Photo from Camera
               <input type="file" id="pe_camera_file" accept="image/*" capture="environment" onchange="previewCapturedPaper(event)" class="hidden">
             </label>
-            <p class="text-[10px] text-slate-500">Ya device gallery se JPG image select karein.</p>
+            <p class="text-[10px] text-slate-500">Or choose JPG image from device gallery.</p>
             <div id="paperPreviewContainer" class="hidden mt-2">
               <img id="paperPreviewImg" class="h-32 mx-auto rounded-lg border-2 border-slate-800 object-contain">
               <p class="text-[9px] text-emerald-700 font-bold mt-1">Photo captured successfully!</p>
@@ -1176,7 +1172,7 @@
 
           <div>
             <label class="block font-bold text-slate-800 mb-0.5">Teacher Remark / Note (Optional)</label>
-            <input type="text" id="pe_remark" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Step-marking achhi hai, calculation par dhyan dein">
+            <input type="text" id="pe_remark" class="w-full p-2 border-2 border-slate-900 rounded-xl" placeholder="Good step-marking, focus on calculations">
           </div>
 
           <div class="pt-2">
@@ -1199,7 +1195,7 @@
         tempCapturedPaperBase64 = evt.target.result;
         document.getElementById('paperPreviewImg').src = tempCapturedPaperBase64;
         document.getElementById('paperPreviewContainer').classList.remove('hidden');
-        showToast("Paper photo capture ho gayi!");
+        showToast("Paper photo captured!");
       };
       reader.readAsDataURL(file);
     }
@@ -1226,22 +1222,21 @@
         return;
       }
 
-      showToast("Marks save ho gaye! WhatsApp open ho raha hai...");
+      showToast("Marks saved! Opening WhatsApp notification...");
       closeModal();
       await refreshData();
 
       const instName = currentInstitute.name || 'CochiHelp';
       const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
 
-      const msg = `*${instName} - Official Test Evaluation*\n\n` +
-        `Namaste ${s.parent_name || 'Guardian'} ji,\n` +
-        `${s.student_name} (${s.standard}) ka checked test paper evaluate ho chuka hai:\n\n` +
-        `📝 *Test:* ${t.test_name} (${t.subject})\n` +
+      // FORMAL ENGLISH TEST REPORT
+      const msg = `Dear Parent,\n\nThis is an official test performance intimation from *${instName}* for *${s.student_name}* (${s.standard}):\n\n` +
+        `📝 *Examination:* ${t.test_name} (${t.subject})\n` +
         `🎯 *Marks Obtained:* ${marks} / ${t.total_marks}\n` +
         `📅 *Date:* ${t.test_date}\n` +
-        (remark ? `📌 *Teacher Note:* ${remark}\n` : '') +
-        (tempCapturedPaperBase64 ? `📸 *Notice:* Checked answer-sheet photo portal par record kar li gayi hai.\n` : '') +
-        `\nContact: ${instPhone}\nDhanyawad!`;
+        (remark ? `📌 *Teacher Feedback:* ${remark}\n` : '') +
+        (tempCapturedPaperBase64 ? `📸 *Notice:* Evaluated answer-sheet photo has been securely archived on the portal.\n` : '') +
+        `\nFor any academic queries, kindly contact: ${instPhone}\n\nWarm regards,\n*Academic Department*\n*${instName}*`;
 
       tempCapturedPaperBase64 = null;
       window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -1263,7 +1258,7 @@
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
             <h3 class="text-base font-black text-slate-900">Daily Attendance Register</h3>
-            <p class="text-xs text-slate-500">Date badalne par automatic new record open hoga</p>
+            <p class="text-xs text-slate-500">Date change automatically switches record register</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <select id="att_batch_select" onchange="changeAttendanceBatch(this.value)" class="p-2 text-xs font-bold border-2 border-slate-900 rounded-xl bg-white">
@@ -1276,7 +1271,7 @@
         ${isHoliday ? `
           <div class="p-3 bg-amber-100 border-2 border-amber-800 rounded-2xl flex items-center gap-2 text-xs font-bold text-amber-900">
             <i class="fa-solid fa-umbrella-beach text-base"></i>
-            <span>Aaj Institute Holiday hai! Yeh din working lectures mein count nahi hoga.</span>
+            <span>Today is an official Institute Holiday! This date is excluded from active lecture calculations.</span>
           </div>
         ` : ''}
 
@@ -1284,10 +1279,10 @@
           <div class="p-3 bg-rose-100 border-2 border-rose-800 rounded-2xl flex items-center justify-between text-xs font-bold text-rose-900">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-lock text-base"></i>
-              <span>Is din ki attendance LOCKED hai. Ab koi isme change nahi kar sakta.</span>
+              <span>Attendance for this date is LOCKED and finalized.</span>
             </div>
             <button onclick="broadcastDailyAttendanceWhatsApp()" class="ink-btn bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold">
-              <i class="fa-brands fa-whatsapp"></i> Re-send Daily WhatsApp
+              <i class="fa-brands fa-whatsapp"></i> Re-send English WhatsApp
             </button>
           </div>
         ` : ''}
@@ -1322,12 +1317,12 @@
                 </div>
               </div>
             `).join('')}
-            ${batchStudents.length === 0 ? '<p class="text-xs text-slate-400 py-6 text-center">Batch me koi student nahi hai.</p>' : ''}
+            ${batchStudents.length === 0 ? '<p class="text-xs text-slate-400 py-6 text-center">No students enrolled in this batch.</p>' : ''}
 
             ${(!isLocked && batchStudents.length > 0) ? `
               <div class="pt-4 flex justify-end">
                 <button type="submit" id="submitAttBtn" class="ink-btn bg-slate-900 text-amber-300 font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-2">
-                  <i class="fa-solid fa-lock text-xs"></i> Save Attendance & Lock Permanently
+                  <i class="fa-solid fa-lock text-xs"></i> Save Attendance & Lock Register
                 </button>
               </div>
             ` : ''}
@@ -1341,12 +1336,12 @@
 
     function markAllAttendance(status) {
       const radios = document.querySelectorAll(`#attendanceForm input[type="radio"][value="${status}"]`);
-      radiforEach(r => r.checked = true);
+      radios.forEach(r => r.checked = true);
     }
 
     async function handleSubmitAttendance(e) {
       e.preventDefault();
-      if (!confirm("Confirm karein: Ek baar Save karne ke baad yeh din permanently lock ho jayega.")) return;
+      if (!confirm("Confirm: Once saved, this attendance register will be permanently locked.")) return;
 
       const btn = document.getElementById('submitAttBtn');
       btn.disabled = true;
@@ -1381,11 +1376,12 @@
       }]);
 
       btn.disabled = false;
-      showToast("Attendance Saved & Locked! WhatsApp alerts open ho rahe hain...");
+      showToast("Attendance Saved & Locked! Dispatching alerts...");
       await refreshData();
       broadcastDailyAttendanceWhatsApp();
     }
 
+    // FORMAL ENGLISH DAILY ATTENDANCE WHATSAPP
     function broadcastDailyAttendanceWhatsApp() {
       const batchStudents = state.students.filter(s => (s.student_batches || []).some(sb => sb.batch_id === currentAttendanceBatch));
       const instName = currentInstitute.name || 'CochiHelp';
@@ -1396,12 +1392,12 @@
           const status = radio ? radio.value : 'present';
           const isP = status === 'present';
 
-          const msg = `*${instName} - Daily Attendance Update*\n\n` +
-            `Namaste ${s.parent_name || 'Guardian'} ji,\n` +
-            `Date: ${currentAttendanceDate}\n` +
-            `Aapka beta/beti *${s.student_name}* (${s.standard}) aaj ke lectures mein *${isP ? 'PRESENT ✅' : 'ABSENT ❌'}* hai.\n\n` +
-            (!isP ? 'Agar koi medical emergency ya leave hai toh kripya institute ko suchit karein.\n' : '') +
-            `Dhanyawad!`;
+          const msg = `Dear Parent,\n\nThis is an official daily attendance intimation from *${instName}*:\n\n` +
+            `• Date: *${currentAttendanceDate}*\n` +
+            `• Student: *${s.student_name}* (${s.standard})\n` +
+            `• Status: *${isP ? 'PRESENT ✅' : 'ABSENT ❌'}*\n\n` +
+            (!isP ? 'If this absence is due to an emergency or prior leave, please notify the institute administration.\n\n' : '') +
+            `Warm regards,\n*Administration Desk*\n*${instName}*`;
 
           window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }, idx * 1200);
@@ -1534,7 +1530,7 @@
         ctx.font = "11px system-ui";
         ctx.fillStyle = "#94a3b8";
         ctx.textAlign = "center";
-        ctx.fillText("Koi test scores record nahi hain", 150, 75);
+        ctx.fillText("No test scores logged yet", 150, 75);
         return;
       }
 
@@ -1573,6 +1569,7 @@
       });
     }
 
+    // FORMAL ENGLISH MONTHLY REPORT WHATSAPP
     async function sendMonthlyReportWhatsApp(studentId) {
       const s = state.students.find(x => x.id === studentId);
       if (!s) return;
@@ -1606,15 +1603,13 @@
       const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
       const monthName = new Date(calendarYear, calendarMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
 
-      const msg = `*${instName} - Monthly Student Performance Report*\n\n` +
-        `Namaste ${s.parent_name || 'Guardian'} ji,\n` +
-        `Yeh ${monthName} ka analysis report card hai:\n\n` +
+      const msg = `Dear Parent,\n\nPlease find below the official Monthly Academic Performance Card from *${instName}* for ${monthName}:\n\n` +
         `👤 *Student:* ${s.student_name} (${s.standard})\n` +
-        `📅 *Total Lectures:* ${workingDays}\n` +
+        `📅 *Total Working Lectures:* ${workingDays}\n` +
         `✅ *Attended Lectures:* ${present}\n` +
-        `📊 *Attendance Percentage:* ${attPct}%\n\n` +
-        `📝 *Test Scores:*\n${testsSummary || '• Is mahine koi test attend nahi hua.\n'}\n` +
-        `Contact: ${instPhone}\nDhanyawad!`;
+        `📊 *Attendance Aggregate:* ${attPct}%\n\n` +
+        `📝 *Examinations Ledger:*\n${testsSummary || '• No examination scores logged during this period.\n'}\n` +
+        `For academic consultations, contact: ${instPhone}\n\nWarm regards,\n*Administration Office*\n*${instName}*`;
 
       window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
@@ -1872,7 +1867,7 @@
       if (error) {
         showToast("Database Validation Failed: " + error.message, true);
       } else {
-        showToast("Payment record ho gayi!");
+        showToast("Payment recorded successfully!");
         closeModal();
         await refreshData();
         generatePDFReceipt(data.id);
@@ -1909,7 +1904,7 @@
                 </div>
               </div>
             `).join('')}
-            ${history.length === 0 ? '<p class="text-xs text-slate-400 py-4 text-center">Koi payment history nahi mili.</p>' : ''}
+            ${history.length === 0 ? '<p class="text-xs text-slate-400 py-4 text-center">No payment history found.</p>' : ''}
           </div>
         </div>
       `;
@@ -1917,13 +1912,13 @@
     }
 
     function voidPaymentPrompt(paymentId) {
-      const reason = prompt("Payment cancel / void karne ka reason likhein:");
+      const reason = prompt("Enter reason for cancellation / void:");
       if (!reason || reason.trim() === '') return;
 
       client.from('fee_payments').update({ status: 'void', void_reason: reason.trim() }).eq('id', paymentId).then(res => {
         if (res.error) showToast(res.error.message, true);
         else {
-          showToast("Payment record void kar di gayi.");
+          showToast("Payment record voided.");
           closeModal();
           refreshData();
         }
@@ -1967,10 +1962,11 @@
       showToast("Fee Receipt PDF generated!");
     }
 
+    // FORMAL ENGLISH FEE OVERDUE REMINDER
     function broadcastFeeRemindersWhatsApp() {
       const overdueStudents = state.students.filter(s => computeStudentPendingBalance(s.id) > 0);
       if (overdueStudents.length === 0) {
-        showToast("Sabhi students ki fees clear hai!");
+        showToast("All accounts are cleared!");
         return;
       }
 
@@ -1978,7 +1974,7 @@
       overdueStudents.forEach((s, idx) => {
         setTimeout(() => {
           const bal = computeStudentPendingBalance(s.id);
-          const msg = `Namaste ${s.parent_name || 'Guardian'} ji,\n\n${instName} notice: ${s.student_name} (${s.standard}) ki fees overdue hai. Pending Balance: ₹${bal.toLocaleString('en-IN')}.\nKripya jald jama karwayein.\nDhanyawad!`;
+          const msg = `Dear Parent,\n\nThis is a gentle payment reminder from *${instName}* regarding the academic fee account of *${s.student_name}* (${s.standard}).\n\n• Outstanding Balance: *₹${bal.toLocaleString('en-IN')}*\n• Status: *Payment Pending*\n\nKindly clear the remaining balance at your earliest convenience to maintain uninterrupted academic records. Thank you for your continued cooperation.\n\nWarm regards,\n*Accounts Desk*\n*${instName}*`;
           window.open(`https://wa.me/91${s.parent_phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }, idx * 1200);
       });
@@ -2115,7 +2111,7 @@
     }
 
     async function deleteTest(testId) {
-      if (!confirm("Kya aap sach me is test ko delete karna chahte hain? Sabhi students ke marks bhi delete ho jayenge.")) return;
+      if (!confirm("Are you sure you want to delete this test? All linked student marks will also be deleted.")) return;
       await client.from('test_scores').delete().eq('test_id', testId);
       const { error } = await client.from('tests').delete().eq('id', testId);
 
@@ -2128,14 +2124,14 @@
     }
 
     // =========================================================================
-    // 8. ENQUIRIES CRM
+    // 8. ENQUIRIES CRM (WITH DELETE BUTTON & LOGIC)
     // =========================================================================
     function renderEnquiriesView(container) {
       container.innerHTML = `
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-base font-black text-slate-900">Enquiries Pipeline</h3>
-            <p class="text-xs text-slate-500">Track admissions & leads</p>
+            <p class="text-xs text-slate-500">Track admissions, leads & remove obsolete inquiries</p>
           </div>
           <button onclick="openEnquiryModal()" class="ink-btn bg-slate-900 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl">
             <i class="fa-solid fa-plus mr-1"></i> New Enquiry
@@ -2151,9 +2147,14 @@
                   <h4 class="text-sm font-black text-slate-900 mt-1">${enq.student_name}</h4>
                   <p class="text-[11px] text-slate-500">+91 ${enq.phone} &bull; Source: ${enq.source}</p>
                 </div>
-                <select onchange="updateEnquiryStatus('${enq.id}', this.value)" class="text-[10px] font-bold p-1 rounded border border-slate-800 bg-amber-50">
-                  ${['New', 'Follow-up', 'Admitted', 'Not Interested'].map(st => `<option value="${st}" ${enq.status === st ? 'selected' : ''}>${st}</option>`).join('')}
-                </select>
+                <div class="flex items-center gap-1.5">
+                  <select onchange="updateEnquiryStatus('${enq.id}', this.value)" class="text-[10px] font-bold p-1 rounded border border-slate-800 bg-amber-50">
+                    ${['New', 'Follow-up', 'Admitted', 'Not Interested'].map(st => `<option value="${st}" ${enq.status === st ? 'selected' : ''}>${st}</option>`).join('')}
+                  </select>
+                  <button onclick="deleteEnquiry('${enq.id}')" title="Delete Enquiry" class="p-1 text-rose-600 hover:text-rose-900 bg-rose-50 border border-rose-200 rounded-lg">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                  </button>
+                </div>
               </div>
 
               <p class="text-xs text-slate-600 bg-slate-50 p-2 rounded-xl">${enq.notes || 'No notes added'}</p>
@@ -2241,6 +2242,7 @@
       }
     }
 
+    // FORMAL ENGLISH PROSPECTIVE ENQUIRY WELCOME MESSAGE
     function sendEnquiryWhatsAppDirect(enquiryId) {
       const enq = state.enquiries.find(x => x.id === enquiryId);
       if (!enq) return;
@@ -2249,10 +2251,10 @@
       const instPhone = currentInstitute.contact_phone ? `+91 ${currentInstitute.contact_phone}` : '';
       const address = currentInstitute.address ? `${currentInstitute.address}, ${currentInstitute.city || ''}` : '';
 
-      const msg = `Namaste ${enq.student_name} ji,\n\n${instName} me enquiry karne ke liye dhanyawad! Hamare yahan ${enq.standard} ke dedicated batches shuru ho rahe hain jisme expert faculty aur periodic test series shamil hai.\n\n` +
-        (address ? `📍 *Location:* ${address}\n` : '') +
-        (instPhone ? `📞 *Contact:* ${instPhone}\n` : '') +
-        `\nKripya institute visit karein admission confirm karne ke liye.`;
+      const msg = `Dear ${enq.student_name},\n\nThank you for reaching out to *${instName}*! We are delighted to assist you regarding admissions for *${enq.standard}*.\n\nOur curriculum offers structured batches, comprehensive study materials, and rigorous testing schedules designed for academic excellence.\n\n` +
+        (address ? `📍 *Campus Location:* ${address}\n` : '') +
+        (instPhone ? `📞 *Helpline:* ${instPhone}\n` : '') +
+        `\nWe welcome you to visit the institute campus for a direct academic consultation and batch allocation.\n\nWarm regards,\n*Admissions Directorate*\n*${instName}*`;
 
       window.open(`https://wa.me/91${enq.phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
@@ -2263,6 +2265,25 @@
       else {
         showToast(`Status updated to ${status}`);
         await refreshData();
+      }
+    }
+
+    // DELETE ENQUIRY LOGIC
+    async function deleteEnquiry(enquiryId) {
+      if (!confirm("Are you sure you want to permanently delete this enquiry?")) return;
+
+      try {
+        const { error } = await client
+          .from('enquiries')
+          .delete()
+          .eq('id', enquiryId);
+
+        if (error) throw error;
+
+        showToast("Enquiry record deleted.");
+        await refreshData();
+      } catch (err) {
+        showToast("Delete failed: " + err.message, true);
       }
     }
 
