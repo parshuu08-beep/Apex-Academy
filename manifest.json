@@ -1,0 +1,15 @@
+{
+  "name": "CochiHelp",
+  "short_name": "CochiHelp",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/512/graduation-cap.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
